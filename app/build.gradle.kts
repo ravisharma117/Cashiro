@@ -270,10 +270,14 @@ dependencies {
 // Copy built APKs to a personal folder with the version in the file name.
 // Opt-in: set APK_COPY_DIR in local.properties (not checked in), e.g.
 //   APK_COPY_DIR=D:/Builds/Cashiro
-val apkCopyDir: String = rootProject.file("local.properties").let { file ->
-    if (!file.exists()) "" else Properties().apply { file.inputStream().use { load(it) } }
-        .getProperty("APK_COPY_DIR", "")
+// Optionally narrow which APKs are copied with a file name pattern, e.g.
+//   APK_COPY_INCLUDE=*-arm64-v8a-*.apk
+val apkCopyProperties: Properties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
 }
+val apkCopyDir: String = apkCopyProperties.getProperty("APK_COPY_DIR", "")
+val apkCopyInclude: String = apkCopyProperties.getProperty("APK_COPY_INCLUDE", "").ifBlank { "*.apk" }
 
 if (apkCopyDir.isNotBlank()) {
     val apkVersionName = android.defaultConfig.versionName ?: "unknown"
@@ -286,7 +290,7 @@ if (apkCopyDir.isNotBlank()) {
 
             val copyApk = tasks.register<Copy>("copy${variantName}Apk") {
                 from(layout.buildDirectory.dir("outputs/apk/$apkSubDir")) {
-                    include("*.apk")
+                    include(apkCopyInclude)
                 }
                 into(apkCopyDir)
                 rename { fileName ->
