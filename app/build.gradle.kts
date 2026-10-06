@@ -266,3 +266,37 @@ dependencies {
     // PDF Box for Android
     implementation(libs.pdfbox.android)
 }
+
+// Copy built APKs to a personal folder with the version in the file name.
+// Opt-in: set APK_COPY_DIR in local.properties (not checked in), e.g.
+//   APK_COPY_DIR=D:/Builds/Cashiro
+val apkCopyDir: String = rootProject.file("local.properties").let { file ->
+    if (!file.exists()) "" else Properties().apply { file.inputStream().use { load(it) } }
+        .getProperty("APK_COPY_DIR", "")
+}
+
+if (apkCopyDir.isNotBlank()) {
+    val apkVersionName = android.defaultConfig.versionName ?: "unknown"
+
+    androidComponents {
+        onVariants { variant ->
+            val variantName = variant.name.replaceFirstChar { it.uppercase() }
+            val apkSubDir = listOfNotNull(variant.flavorName?.takeIf { it.isNotEmpty() }, variant.buildType)
+                .joinToString("/")
+
+            val copyApk = tasks.register<Copy>("copy${variantName}Apk") {
+                from(layout.buildDirectory.dir("outputs/apk/$apkSubDir")) {
+                    include("*.apk")
+                }
+                into(apkCopyDir)
+                rename { fileName ->
+                    fileName.removeSuffix(".apk").replaceFirst("app-", "Cashiro-") + "-v$apkVersionName.apk"
+                }
+            }
+
+            tasks.matching { it.name == "assemble$variantName" }.configureEach {
+                finalizedBy(copyApk)
+            }
+        }
+    }
+}
