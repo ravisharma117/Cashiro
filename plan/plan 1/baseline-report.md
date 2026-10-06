@@ -8,12 +8,12 @@ Date: 2026-10-06
 | --- | --- |
 | 1. `upstream` remote | Done |
 | 2. `develop` branch | Done — `main` synced with upstream; `main` and `develop` pushed |
-| 3. Build both flavors | **Blocked** — no JDK or Android SDK on this machine |
-| 4. Test and lint baseline | **Blocked** — same reason |
-| 5. Feature checklist on a device | **Not done** — needs the APK from step 3 |
+| 3. Build both flavors | Done — both debug flavors build |
+| 4. Test and lint baseline | Done — recorded below: one flaky unit test, 233 existing lint errors |
+| 5. Feature checklist on a device | **Open** — the owner will walk it on a phone |
 | 6. License check | Done |
 | 7. `CLAUDE.md` corrected | Done |
-| 8. CI runs app unit tests | Workflow edited; unverified until it runs on GitHub |
+| 8. CI runs app unit tests | Done — `app-tests` and `parser-tests` both passed on `develop` |
 
 ## 1. Remotes
 
@@ -28,33 +28,63 @@ Date: 2026-10-06
 - A stray local `dev` branch that appeared during this work was deleted; it pointed at the same commit, so nothing was lost.
 - State after this step: `main`, `develop`, `origin/main`, `origin/develop` and `upstream/main` are all at `40a387fd`.
 - Version is unchanged by the sync: 2.1.61-beta, `versionCode` 94.
-- The Plan 1 edits (`CLAUDE.md`, `.github/workflows/test.yml`, `plan/`) are uncommitted in the working tree on `develop`.
+- The Plan 1 edits (`CLAUDE.md`, `.github/workflows/test.yml`, `plan/`) and the APK copy step are committed and pushed on `develop`.
 
 ## 3–4. Build, test, lint
 
-Not run. The machine has:
+### Environment set up on this machine
 
-- no `java` on `PATH`, no `JAVA_HOME`
-- no Android SDK (`ANDROID_HOME` / `ANDROID_SDK_ROOT` unset; nothing under `%LOCALAPPDATA%\Android`)
-- no Android Studio
-- no `local.properties` in the repository
+The machine had no JDK, Android SDK or Android Studio. Installed:
 
-What the build needs:
+- Temurin JDK 17 (`C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot`), via `winget`
+- Android SDK at `%LOCALAPPDATA%\Android\Sdk`: command-line tools, platform-tools, `platforms;android-36`, `build-tools;36.0.0`
+- `local.properties` (gitignored) with `sdk.dir`, plus the personal APK copy settings
 
-- JDK 17 (CI uses Temurin 17; the app targets JVM 11 bytecode)
-- Android SDK with platform 36 and matching build-tools (`compileSdk = 36`)
-- `local.properties` with `sdk.dir=…`. `RSA_PUBLIC_KEY` and the release keystore entries are optional: the build falls back to an empty key and debug builds need no keystore.
-- Gradle 8.13 is fetched by the wrapper.
+Two problems had to be fixed before the build passed:
 
-Commands to run once the tools are installed:
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| `java.io.IOException: Invalid file path` | `sdk.dir` written with single backslashes | Use forward slashes in `local.properties` |
+| `OutOfMemoryError: GC overhead limit exceeded` in the Kotlin compile | Both flavors compiling in parallel in a 2 GB compiler process, on a 16 GB machine with about 1 GB free | Build one flavor per invocation and pass `-Pkotlin.daemon.jvmargs=-Xmx4g` |
+
+`gradle.properties` was not changed. The working commands on this machine:
 
 ```
-./gradlew :app:assembleStandardDebug :app:assembleFdroidDebug
-./gradlew test
-./gradlew lint
+./gradlew :app:assembleStandardDebug -Pkotlin.daemon.jvmargs=-Xmx4g
+./gradlew :app:assembleFdroidDebug   -Pkotlin.daemon.jvmargs=-Xmx4g
 ```
 
-Record the results here, including failures that exist before any feature work.
+### Results
+
+Tests and lint were run for the `standard` debug variant only. The blanket `./gradlew test` and `./gradlew lint` also compile both release variants, which this machine does not have the memory for. CI runs the same scope.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Build `standard` debug | `:app:assembleStandardDebug` | Pass — five APKs (four per-architecture plus universal) |
+| Build `fdroid` debug | `:app:assembleFdroidDebug` | Pass — one APK |
+| Parser tests | `:parser-core:test` | Pass — 395 tests, 0 failures |
+| App unit tests | `:app:testStandardDebugUnitTest` | 158 tests, **1 flaky failure** (see below) |
+| Lint | `:app:lintStandardDebug` | **Fails** — 233 errors, 1,877 warnings, 6 hints |
+
+Release builds were not attempted (they need the release keystore).
+
+### Known issues that exist before any feature work
+
+**Flaky unit test.** `AddTransactionUseCaseTest` › `undoing CREDIT delete re-applies the balance` fails intermittently with `expected:<30000> but was:<25000>`. It failed in the full run, then passed 2 of 3 times when the class was rerun alone, and passed in CI. The cause was not investigated. Treat a failure of this one test as pre-existing, and fix or stabilise it before Plan 10, which relies on this test class to pin current behaviour.
+
+**Lint errors.** All 233 are in upstream code. By message, the largest groups are:
+
+- Translated strings whose format arguments do not match the English string (`duration_minutes_seconds`, `duration_seconds`, `batch_progress_format`) — about 59
+- Plural strings with a `one` quantity that is wrong for the locale — about 24
+- Reading resource values through `LocalContext.current` in composables — 22
+
+Most of the errors come from the Crowdin-managed translation files, not from Kotlin code. Because lint fails today, it cannot gate merges as it stands. Options: add a lint baseline file so only new errors fail, or fix the translation format errors at source. Reports are in `app/build/reports/` (not checked in).
+
+### APK output
+
+A post-build step in `app/build.gradle.kts` copies the built APK to a personal folder with the version in the file name, for example `Cashiro-standard-universal-debug-v2.1.61-beta.apk`. It is opt-in through `APK_COPY_DIR` and `APK_COPY_INCLUDE` in `local.properties` and does nothing when those are absent.
+
+For a phone, use the universal or `arm64-v8a` APK. The `x86` APK is for emulators and does not install on a phone.
 
 ## 5. Feature verification checklist
 
@@ -114,11 +144,13 @@ Still stale and left alone: the "Supported Banks (44 parsers)" list and the pars
 - Triggers now include `develop` for pushes and pull requests.
 - New job `app-tests` runs `./gradlew :app:testStandardDebugUnitTest --continue` and uploads the results.
 
-Unverified until the workflow runs on GitHub, which needs `develop` pushed.
+Verified: on `develop` at `e7239988`, both `parser-tests` and `app-tests` completed successfully.
 
 ## Open items to close Plan 1
 
-1. Choose `dev` or `develop` as the integration branch and delete the other; fast-forward `main` to upstream if wanted; push the branches to `origin`.
-2. Install JDK 17 and the Android SDK, then run the build, tests and lint and fill in sections 3–4.
-3. Walk the feature checklist on a device and fill in section 5.
-4. Confirm the new CI job passes on its first run.
+1. Walk the feature checklist in section 5 on a phone (owner).
+
+Carried forward, not blocking Plan 1:
+
+- Stabilise the flaky `AddTransactionUseCaseTest` case before Plan 10.
+- Lint: decided on 2026-10-06 to leave the 233 existing errors as they are. Lint is not a merge gate; check new code for lint errors by reading the report, not by the task's exit status.
