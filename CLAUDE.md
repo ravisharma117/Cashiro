@@ -24,8 +24,8 @@ Please reference these documents when working on this project:
 - **Spacing**: 8dp grid system
 - **Typography**: Material 3 type scale
 - **Navigation**: NavigationBar for phones, NavigationRail for tablets
-- **Edge-to-Edge**: All screens use PennyWiseScaffold with default TopAppBar for consistent system bar handling
-- **Consistent UI**: PennyWiseScaffold provides default TopAppBar with options for title, navigation, actions, and transparency
+- **Edge-to-Edge**: Screens use Material 3 `Scaffold` with `CustomTitleTopAppBar` (`presentation/ui/components/CustomTitleTopAppBar.kt`) for consistent system bar handling
+- **Consistent UI**: `CustomTitleTopAppBar` is the shared top bar; reuse it for new screens instead of building a new one
 
 ## Code Style Guidelines
 - Follow Kotlin coding conventions
@@ -35,11 +35,18 @@ Please reference these documents when working on this project:
 - Always test on both light and dark themes
 
 ## Current Phase
-Working on Phase 1: Core Foundation (Project setup, Material 3 theming, Room database, Navigation)
+Working through the 20-step plan in `/plan/README.md` (one `plan.md` per `plan N` folder). Check the status table there before starting work.
+
+## Branch Workflow
+- `main`: release branch
+- `develop`: integration branch; feature branches are created from it and merged back after their plan's verification passes
+- `feature/<name>`: one branch per plan, named in `/plan/README.md`
+- `upstream` remote: the original Cashiro repository (`ritesh-kanwar/Cashiro`), fetched for upstream changes
 
 ## Commands to Run
-- Build: `./gradlew build`
+- Build (debug, both flavors): `./gradlew :app:assembleStandardDebug :app:assembleFdroidDebug`
 - Test: `./gradlew test`
+- App unit tests only: `./gradlew :app:testStandardDebugUnitTest`
 - Lint: `./gradlew lint`
 
 ## Versioning Strategy
@@ -48,12 +55,7 @@ We follow Semantic Versioning (SemVer) - MAJOR.MINOR.PATCH:
 - **MINOR**: New features, significant improvements
 - **PATCH**: Bug fixes, minor improvements, performance optimizations
 
-Current version: 2.1.3 (versionCode: 13)
-
-Recent version history:
-- 2.1.3: Federal Bank support, Discord community, GitHub issue templates
-- 2.1.2: Spotlight tutorial, SBI/Indian Bank support, auto-scan on launch
-- 2.0.1: Previous release
+Current version: 2.1.61-beta (versionCode: 94). The source of truth is `app/build.gradle.kts`.
 
 ## Module Structure
 The project now uses a multi-module architecture:
