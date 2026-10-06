@@ -123,7 +123,7 @@ class CrashActivity : ComponentActivity() {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, crashLog)
-                putExtra(Intent.EXTRA_SUBJECT, "Cashiro Crash Report")
+                putExtra(Intent.EXTRA_SUBJECT, "Paisa IQ Crash Report")
             }
             startActivity(Intent.createChooser(shareIntent, "Share crash report"))
         }
@@ -224,7 +224,7 @@ fun CrashScreen(
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                         Text(
-                            text = "Cashiro encountered a fatal error and had to stop. Please share the report below to help us fix the issue.",
+                            text = "Paisa IQ encountered a fatal error and had to stop. Please share the report below to help us fix the issue.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f),
                             lineHeight = 16.sp

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cashiro</string>
+    <string name="app_name" translatable="false">Paisa IQ</string>
     <!-- App shortcuts -->
     <string name="add_transaction">Add Transaction</string>
     <string name="add_subscription">Add Subscription</string>
@@ -294,7 +294,7 @@
     <string name="chart_format">%1$s Chart</string>
     <string name="toggle_view">Toggle View</string>
     <!-- Chat Screen -->
-    <string name="cashiro_ai">Cashiro AI</string>
+    <string name="cashiro_ai">Paisa IQ AI</string>
     <string name="more_options">More options</string>
     <string name="clear_chat">Clear Chat</string>
     <string name="qwen_model_required">Qwen Model Required</string>
@@ -327,7 +327,7 @@
     <string name="press_back_again_to_close">Press back again to close the app</string>
     <string name="transaction_deleted">Transaction deleted</string>
     <string name="undo">Undo</string>
-    <string name="cashiro_title">Cashiro</string>
+    <string name="cashiro_title">Paisa IQ</string>
     <string name="profile">Profile</string>
     <string name="banner">Banner</string>
     <string name="recent">Recent</string>
@@ -365,7 +365,7 @@
     <string name="stay_updated">Stay Updated</string>
     <string name="automatic_tracking">Automatic Tracking</string>
     <string name="allow_notifications_desc">Allow notifications to receive bill reminders and daily summaries.</string>
-    <string name="automatic_tracking_desc">Cashiro can automatically scan your transaction SMS to keep your accounts up to date.</string>
+    <string name="automatic_tracking_desc">Paisa IQ can automatically scan your transaction SMS to keep your accounts up to date.</string>
     <string name="skip_for_now">Skip for now</string>
     <string name="verify_accounts">Verify Accounts</string>
     <string name="scanning_messages">Scanning Messages</string>
@@ -440,7 +440,7 @@
     <string name="share">Share</string>
     <string name="retry">Retry</string>
     <string name="share_csv">Share CSV</string>
-    <string name="csv_export_subject">Cashiro Transactions Export</string>
+    <string name="csv_export_subject">Paisa IQ Transactions Export</string>
     <!-- TransactionDetailScreen -->
     <string name="edit_transaction">Edit Transaction</string>
     <string name="transaction_details">Transaction Details</string>
@@ -509,7 +509,7 @@
     <string name="sync_sms_to_see_transactions">Sync your SMS to see transactions</string>
     <!-- About Screen -->
     <string name="about">About</string>
-    <string name="cashiro_logo_cd">Cashiro Logo</string>
+    <string name="cashiro_logo_cd">Paisa IQ Logo</string>
     <string name="version_format">Version %1$s, db-v%2$d</string>
     <string name="developed_by">Developed By Ritesh</string>
     <string name="lead_developer_cd">lead developer</string>
@@ -517,12 +517,13 @@
     <string name="github">Github</string>
     <string name="discord">Discord</string>
     <string name="join_community">Join our community</string>
+    <string name="based_on_cashiro" translatable="false">Based on Cashiro</string>
     <string name="faq">FAQ</string>
     <string name="faq_desc">Frequently asked questions</string>
     <string name="guides">Guides</string>
-    <string name="guides_desc">How to use Cashiro</string>
+    <string name="guides_desc">How to use Paisa IQ</string>
     <string name="report_bug">Report Bug</string>
-    <string name="report_bug_desc">Help us improve Cashiro</string>
+    <string name="report_bug_desc">Help us improve Paisa IQ</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="privacy_policy_desc">Your data usage and privacy</string>
     <string name="terms_of_service">Terms of Service</string>
@@ -588,7 +589,7 @@
     <string name="two_years">2 years</string>
     <!-- Unrecognized SMS Screen -->
     <string name="unrecognized_messages_title">Unrecognized Messages</string>
-    <string name="unrecognized_bank_messages_desc">These messages from potential banks couldn\'t be automatically parsed. Help improve Cashiro by reporting them so we can add support for more banks.</string>
+    <string name="unrecognized_bank_messages_desc">These messages from potential banks couldn\'t be automatically parsed. Help improve Paisa IQ by reporting them so we can add support for more banks.</string>
     <string name="show_reported">Show Reported</string>
     <string name="count_new_format">%1$d new</string>
     <string name="count_reported_format">%1$d reported</string>
@@ -632,7 +633,7 @@
     <string name="delete_webhook_confirm_desc">This profile, its scheduled syncs, and all delivery logs will be removed. This can\'t be undone.</string>
     <string name="byoapi_sync_title">BYOAPI Finance Sync</string>
     <string name="byoapi_sync_desc">Send selected finance data to your own endpoint. Any HTTP 2xx response is treated as a successful delivery.</string>
-    <string name="byoapi_sync_warning">This will send your financial data to the URL you configure. Cashiro cannot verify the security of that endpoint.</string>
+    <string name="byoapi_sync_warning">This will send your financial data to the URL you configure. Paisa IQ cannot verify the security of that endpoint.</string>
     <string name="sync_now">Sync now</string>
     <string name="sync_now_desc">Trigger delivery for all enabled profiles</string>
     <string name="sync_schedule_title">Sync Schedule</string>
@@ -948,7 +949,7 @@
 <string name="amoled_black_desc">Use pure black background for deeper contrast</string>
 <string name="amount_i_owe_them">The Amount I owe them</string>
 <string name="amount_they_owe_me">The Amount they owe me</string>
-<string name="app_locked_title">Cashiro is Locked</string>
+<string name="app_locked_title">Paisa IQ is Locked</string>
 <string name="appearance_title">Appearance</string>
 <string name="auth_failed_format">Authentication failed: %1$s</string>
 <string name="authenticate_desc">Authenticate to access your expense data</string>
@@ -1147,7 +1148,7 @@
 <string name="notification_access_active">Notification access is active</string>
 <string name="notification_access_desc">Enable to detect bank transactions from push notifications</string>
 <string name="notification_access_required">Notification Access Required</string>
-<string name="notification_access_required_desc">To automatically detect bank transactions in real-time, Cashiro requires notification access. This is a system-level permission.</string>
+<string name="notification_access_required_desc">To automatically detect bank transactions in real-time, Paisa IQ requires notification access. This is a system-level permission.</string>
 <string name="open_settings">Open Settings</string>
 <string name="options_desc">Options</string>
 <string name="overdue_count_format">%1$d Overdue</string>
@@ -1232,7 +1233,7 @@
 <string name="split_transaction">Split</string>
 <string name="starting_cloud_backup">Starting cloud backup...</string>
 <string name="step_1">Tap the \'Open Settings\' button below.</string>
-<string name="step_2">Find \'Cashiro\' in the list of applications.</string>
+<string name="step_2">Find \'Paisa IQ\' in the list of applications.</string>
 <string name="step_3">Toggle \'Allow notification access\' to enabled.</string>
 <string name="storage_provider">Storage Provider</string>
 <string name="store_backups_local_desc">Store backups only on this device</string>

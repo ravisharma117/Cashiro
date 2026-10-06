@@ -80,14 +80,15 @@ object Constants {
      * External Links
      */
     object Links {
-        const val DISCORD_URL = "https://discord.gg/6qaYgpJTg"
-        const val GITHUB_URL = "https://github.com/ritesh-kanwar/Cashiro"
+        const val GITHUB_URL = "https://github.com/ravisharma117/Cashiro"
+        const val UPSTREAM_GITHUB_URL = "https://github.com/ritesh-kanwar/Cashiro"
+        const val NEW_ISSUE_URL = "$GITHUB_URL/issues/new"
         const val WEBSITE_URL = "https://ritesh-kanwar.github.io/cashiro.showcase"
-        const val PRIVACY_POLICY_URL = "https://ritesh-kanwar.github.io/cashiro.showcase/privacy"
+        const val PRIVACY_POLICY_URL = "$GITHUB_URL/blob/main/PRIVACY.md"
         const val TERMS_OF_SERVICE_URL = "https://ritesh-kanwar.github.io/cashiro.showcase/terms"
         const val FAQ_URL = "https://ritesh-kanwar.github.io/cashiro.showcase/faq"
         const val GUIDE_URL = "https://ritesh-kanwar.github.io/cashiro.showcase/guides"
-        const val REPORT_BUG_URL = "https://github.com/ritesh-kanwar/Cashiro/issues/new/choose"
+        const val REPORT_BUG_URL = "$NEW_ISSUE_URL/choose"
     }
     object Device {
         val is64Bit = android.os.Build.SUPPORTED_ABIS.firstOrNull()

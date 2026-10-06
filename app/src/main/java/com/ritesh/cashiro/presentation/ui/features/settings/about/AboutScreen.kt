@@ -186,13 +186,10 @@ fun AboutScreen(
 
                 AboutDeveloperItem(
                     title = stringResource(R.string.developed_by),
-                    subtitle = "modestcat0309@gmail.com",
+                    subtitle = "NAX IT Solutions",
                     onClick = {
-                        val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = "mailto:modestcat0309@gmail.com".toUri()
-                            putExtra(Intent.EXTRA_SUBJECT, "Feedback for Cashiro")
-                        }
-                        context.startActivity(Intent.createChooser(intent, "Send Email"))
+                        val intent = Intent(Intent.ACTION_VIEW, Constants.Links.GITHUB_URL.toUri())
+                        context.startActivity(intent)
                     },
                     position = ListItemPosition.Single,
                     leading = {
@@ -239,7 +236,7 @@ fun AboutScreen(
                     )
                     AboutListItem(
                         title = stringResource(R.string.github),
-                        subtitle = "ritesh-kanwar/Cashiro",
+                        subtitle = "ravisharma117/Cashiro",
                         icon = Iconax.Github,
                         iconColor = green_dark,
                         iconBackground = green_light,
@@ -254,15 +251,15 @@ fun AboutScreen(
                         position = ListItemPosition.Middle
                     )
                     AboutListItem(
-                        title = stringResource(R.string.discord),
-                        subtitle = stringResource(R.string.join_community),
-                        icon = Iconax.Discord,
+                        title = stringResource(R.string.based_on_cashiro),
+                        subtitle = "ritesh-kanwar/Cashiro",
+                        icon = Iconax.Github,
                         iconColor = purple_dark,
                         iconBackground = purple_light,
                         isLink = true,
                         onClick = {
                             val intent =
-                                Intent(Intent.ACTION_VIEW, Constants.Links.DISCORD_URL.toUri())
+                                Intent(Intent.ACTION_VIEW, Constants.Links.UPSTREAM_GITHUB_URL.toUri())
                             context.startActivity(intent)
                         },
                         position = ListItemPosition.Bottom
