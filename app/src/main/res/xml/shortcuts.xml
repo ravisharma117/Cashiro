@@ -7,7 +7,7 @@
         android:shortcutShortLabel="@string/add_transaction">
         <intent
             android:action="com.ritesh.cashiro.action.ADD_TRANSACTION"
-            android:targetPackage="com.ritesh.cashiro"
+            android:targetPackage="com.naxits.paisatracker"
             android:targetClass="com.ritesh.cashiro.MainActivity" />
     </shortcut>
     <shortcut
@@ -17,7 +17,7 @@
         android:shortcutShortLabel="@string/add_subscription">
         <intent
             android:action="com.ritesh.cashiro.action.ADD_SUBSCRIPTION"
-            android:targetPackage="com.ritesh.cashiro"
+            android:targetPackage="com.naxits.paisatracker"
             android:targetClass="com.ritesh.cashiro.MainActivity" />
     </shortcut>
     <shortcut
@@ -27,7 +27,7 @@
         android:shortcutShortLabel="@string/add_transfer">
         <intent
             android:action="com.ritesh.cashiro.action.ADD_TRANSFER"
-            android:targetPackage="com.ritesh.cashiro"
+            android:targetPackage="com.naxits.paisatracker"
             android:targetClass="com.ritesh.cashiro.MainActivity" />
     </shortcut>
 </shortcuts>

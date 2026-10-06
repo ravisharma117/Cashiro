@@ -1,5 +1,7 @@
 package com.ritesh.cashiro.presentation.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.ritesh.cashiro.R
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -180,17 +182,17 @@ private fun LargerTopAppBar(
             NavigationForLargeTopAppBar(
                 hasBackButton = hasBackButton,
                 navigationContent = navigationContent,
-                isHomeScreen = title == "Cashiro"
+                isHomeScreen = title == stringResource(R.string.cashiro_title)
             )
         },
         actions = {
             ActionForLargeTopAppBar(
                 actionContent = actionContent,
-                isHomeScreen = title == "Cashiro"
+                isHomeScreen = title == stringResource(R.string.cashiro_title)
             )
         },
         collapsedHeight = TopAppBarDefaults.LargeAppBarCollapsedHeight,
-        expandedHeight = if (title == "Cashiro") 150.dp else 110.dp,
+        expandedHeight = if (title == stringResource(R.string.cashiro_title)) 150.dp else 110.dp,
         windowInsets = WindowInsets(0.dp),
         scrollBehavior = scrollBehaviorLarge,
         modifier = Modifier
@@ -235,7 +237,7 @@ private fun TitleForLargeTopAppBar(
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         BlurredAnimatedVisibility(
-            visible = title != "Cashiro" && showTitle,
+            visible = title != stringResource(R.string.cashiro_title) && showTitle,
             enter = fadeIn() + scaleIn(),
             exit = fadeOut() + scaleOut()
         ) {
@@ -302,7 +304,7 @@ private fun RegularTopAppBar(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        val isHomeScreen = title == "Cashiro"
+        val isHomeScreen = title == stringResource(R.string.cashiro_title)
 
         TopAppBar(
             title = {
@@ -319,7 +321,7 @@ private fun RegularTopAppBar(
                         modifier = Modifier.animatedOffsetModifier(
                             hasBackButton = hasBackButton,
                             hasActionButton = hasActionButton,
-                            isHomeScreen = title == "Cashiro",
+                            isHomeScreen = title == stringResource(R.string.cashiro_title),
                         )
                     )
                 }

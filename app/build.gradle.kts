@@ -19,7 +19,7 @@ android {
         buildConfig = true
     }
     defaultConfig {
-        applicationId = "com.ritesh.cashiro"
+        applicationId = "com.naxits.paisatracker"
         minSdk = 26
         targetSdk = 36
         versionCode = 94
@@ -294,7 +294,7 @@ if (apkCopyDir.isNotBlank()) {
                 }
                 into(apkCopyDir)
                 rename { fileName ->
-                    fileName.removeSuffix(".apk").replaceFirst("app-", "Cashiro-") + "-v$apkVersionName.apk"
+                    fileName.removeSuffix(".apk").replaceFirst("app-", "PaisaIQ-") + "-v$apkVersionName.apk"
                 }
             }
 

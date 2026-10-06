@@ -11,7 +11,7 @@ In every plan, `$APP` means `app/src/main/java/com/ritesh/cashiro`.
 | # | Plan | Requirement § | Depends on | Branch | Status |
 | --- | --- | --- | --- | --- | --- |
 | 1 | [Baseline & branching](plan%201/plan.md) | 3, 24 (Phase 0), 25 | — | `develop` | ◐ device checklist open |
-| 2 | [Rebrand](plan%202/plan.md) | 3, 24 (Phase 0) | 1 | `feature/rebrand` | ☐ |
+| 2 | [Rebrand](plan%202/plan.md) | 3, 24 (Phase 0) | 1 | `feature/rebrand` | ☑ icons unchanged; Issues to enable on the fork |
 | 3 | [Account types & Cash account](plan%203/plan.md) | 6 | 1 | `feature/cash-account` | ☐ |
 | 4 | [Account reordering](plan%204/plan.md) | 8 | 3 | `feature/account-reorder` | ☐ |
 | 5 | [App Lock PIN & Security settings](plan%205/plan.md) | 7, 24 (Phase 6) | 1 | `feature/app-lock` | ☐ |

@@ -71,7 +71,7 @@ class BiometricAuthManager @Inject constructor(
      */
     fun authenticate(
         activity: FragmentActivity,
-        title: String = "Unlock Cashiro",
+        title: String = "Unlock Paisa IQ",
         subtitle: String = "Authenticate to access your expense data",
         description: String = "Use your biometric credential or device PIN",
         onSuccess: () -> Unit,

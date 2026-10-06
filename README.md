@@ -1,4 +1,7 @@
 <a name="top"></a>
+
+> **Paisa IQ** is a fork of [Cashiro](https://github.com/ritesh-kanwar/Cashiro) by its original authors, maintained by NAX IT Solutions and focused on Indian banking and UPI. Application ID: `com.naxits.paisatracker`. It is licensed under AGPL-3.0, like the original. The rest of this README still describes upstream Cashiro; the roadmap for this fork is in [plan/README.md](plan/README.md).
+
 [![Cashiro Banner](banner.png)](https://github.com/sarim2000/pennywiseai-tracker)
 
 [//]: # ([![GitHub stars]&#40;https://img.shields.io/github/stars/sarim2000/pennywiseai-tracker?style=social&#41;]&#40;https://github.com/sarim2000/pennywiseai-tracker&#41;)
