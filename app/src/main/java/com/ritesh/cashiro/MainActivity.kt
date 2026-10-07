@@ -1,5 +1,6 @@
 package com.ritesh.cashiro
 
+import com.ritesh.cashiro.data.security.PrivacyController
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -58,6 +59,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var userPreferencesRepository: UserPreferencesRepository
 
+    @Inject
+    lateinit var privacyController: PrivacyController
+
     // Transaction ID to edit when launched from notification
     var editTransactionId by mutableStateOf<Long?>(null)
         private set
@@ -92,6 +96,23 @@ class MainActivity : AppCompatActivity() {
         // Schedule daily reminders
         lifecycleScope.launch {
             notificationScheduler.scheduleDailyReminder()
+        }
+
+        // Keep hidden totals and the proximity-sensor reveal in step with the settings
+        privacyController.bind(this)
+
+        // Hide the app in recent apps and block screenshots when the user asked for it
+        lifecycleScope.launch {
+            userPreferencesRepository.secureWindowEnabled.collect { secure ->
+                if (secure) {
+                    window.setFlags(
+                        android.view.WindowManager.LayoutParams.FLAG_SECURE,
+                        android.view.WindowManager.LayoutParams.FLAG_SECURE
+                    )
+                } else {
+                    window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                }
+            }
         }
 
         // Load custom currencies into CurrencySymbols

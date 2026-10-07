@@ -620,7 +620,7 @@ fun SharedTransitionScope.AnalyticsScreen(
                             this@AnalyticsScreen.TransactionItem(
                                 merchantName = merchant.name,
                                 amount = merchant.amount,
-                                amountOverride = CurrencyFormatter.formatCurrency(merchant.amount, uiState.currency),
+                                amountOverride = CurrencyFormatter.formatTotal(merchant.amount, uiState.currency),
                                 subtitleOverride = buildString {
                                     append("${merchant.transactionCount} ")
                                     append(if (merchant.transactionCount == 1) "transaction" else "transactions")
@@ -758,7 +758,7 @@ fun SharedTransitionScope.CategoryProgressItem(
                 }
             }
             Text(
-                text = CurrencyFormatter.formatCurrency(amount, currency),
+                text = CurrencyFormatter.formatTotal(amount, currency),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold

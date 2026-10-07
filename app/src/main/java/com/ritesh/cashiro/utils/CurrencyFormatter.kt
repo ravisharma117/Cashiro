@@ -104,6 +104,23 @@ object CurrencyFormatter {
     }
 
     /**
+     * Formats a total (a balance, a net worth, a monthly sum) for display. Same as [formatCurrency],
+     * except that while the user is hiding total amounts it returns the currency symbol followed by
+     * a fixed mask, so nothing about the size of the amount shows.
+     *
+     * Use this for totals shown on screen only. Anything exported or sent elsewhere must keep using
+     * [formatCurrency].
+     */
+    fun formatTotal(amount: BigDecimal, currencyCode: String = "INR"): String {
+        if (!PrivacyGate.isHidingTotals) return formatCurrency(amount, currencyCode)
+        return CurrencySymbols.getSymbol(currencyCode) + PrivacyGate.MASK
+    }
+
+    fun formatTotal(amount: Double, currencyCode: String = "INR"): String {
+        return formatTotal(amount.toBigDecimal(), currencyCode)
+    }
+
+    /**
      * Formats a Double amount as currency with the specified currency code
      */
     fun formatCurrency(amount: Double, currencyCode: String = "INR"): String {

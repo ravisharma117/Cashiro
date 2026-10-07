@@ -80,6 +80,8 @@ object Constants {
      * External Links
      */
     object Links {
+        /** The NAX IT Solutions API that mails PIN recovery codes. */
+        const val API_BASE_URL = "https://naxits-api.netlify.app"
         const val GITHUB_URL = "https://github.com/ravisharma117/Cashiro"
         const val UPSTREAM_GITHUB_URL = "https://github.com/ritesh-kanwar/Cashiro"
         const val NEW_ISSUE_URL = "$GITHUB_URL/issues/new"

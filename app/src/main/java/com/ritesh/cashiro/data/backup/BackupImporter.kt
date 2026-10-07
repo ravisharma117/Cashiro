@@ -851,5 +851,11 @@ class BackupImporter @Inject constructor(
         preferences.accountOrder?.takeIf { it.isNotEmpty() }?.let {
             userPreferencesRepository.updateAccountOrder(it)
         }
+
+        // Privacy settings
+        preferences.privacy?.let {
+            userPreferencesRepository.setHideTotalAmounts(it.hideTotals)
+            userPreferencesRepository.setRevealOnProximity(it.revealOnProximity)
+        }
     }
 }

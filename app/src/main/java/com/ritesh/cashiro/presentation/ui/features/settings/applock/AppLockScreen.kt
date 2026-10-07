@@ -32,8 +32,10 @@ fun AppLockScreen(
     modifier: Modifier = Modifier,
     onUnlocked: () -> Unit,
     appLockViewModel: AppLockViewModel = hiltViewModel(),
+    pinLockViewModel: PinLockViewModel = hiltViewModel(),
 ) {
     val uiState by appLockViewModel.uiState.collectAsStateWithLifecycle()
+    val pinState by pinLockViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     // Prevent back navigation when app is locked
@@ -42,11 +44,25 @@ fun AppLockScreen(
         // User must authenticate to proceed
     }
 
-    // Auto-trigger authentication when screen is shown
-    LaunchedEffect(Unit) {
-        if (uiState.canUseBiometric && context is FragmentActivity) {
+    // Auto-trigger authentication when screen is shown, once the lock settings are known
+    LaunchedEffect(uiState.isLoaded) {
+        if (uiState.isLoaded && !uiState.usesPin && uiState.canUseBiometric && context is FragmentActivity) {
             triggerAuthentication(context, appLockViewModel)
         }
+    }
+
+    // With a PIN, offer the fingerprint once it is known to be available
+    var autoPrompted by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.usesPin, pinState.biometricAvailable) {
+        if (uiState.usesPin && pinState.biometricAvailable && !autoPrompted && context is FragmentActivity) {
+            autoPrompted = true
+            pinLockViewModel.triggerBiometric(context)
+        }
+    }
+
+    // A correct PIN (or reset) unlocks through the same path as the phone's own lock
+    LaunchedEffect(pinState.unlocked) {
+        if (pinState.unlocked) appLockViewModel.onAuthenticationSuccess()
     }
 
     // Navigate away only on explicit authentication success
@@ -81,6 +97,23 @@ fun AppLockScreen(
                 .padding(Spacing.lg),
             contentAlignment = Alignment.Center
         ) {
+          if (uiState.usesPin) {
+            PinLockContent(
+                state = pinState,
+                onPinEntered = pinLockViewModel::onPinEntered,
+                onBiometric = {
+                    if (context is FragmentActivity) pinLockViewModel.triggerBiometric(context)
+                },
+                onForgotPin = pinLockViewModel::startRecovery,
+                recoveryActions = PinRecoveryActions(
+                    onCancel = pinLockViewModel::cancelRecovery,
+                    onSendCode = pinLockViewModel::sendRecoveryCode,
+                    onSubmitCode = pinLockViewModel::submitRecoveryCode,
+                    onNewPin = pinLockViewModel::onNewPinEntered,
+                    onConfirmNewPin = pinLockViewModel::onNewPinConfirmed
+                )
+            )
+          } else {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
@@ -199,6 +232,7 @@ fun AppLockScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+          }
         }
     }
 }

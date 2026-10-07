@@ -226,7 +226,7 @@ fun BalanceCard(
                                 horizontalAlignment = Alignment.End
                             ) {
                                 Text(
-                                    text = CurrencyFormatter.formatCurrency(totalBalance, currency),
+                                    text = CurrencyFormatter.formatTotal(totalBalance, currency),
                                     style = MaterialTheme.typography.headlineSmall,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     lineHeight = 24.sp,
@@ -317,7 +317,7 @@ fun BalanceCard(
                             )
                             SummaryItem(
                                 label = stringResource(R.string.balance_label),
-                                value = CurrencyFormatter.formatCurrency(totalBalance, currency)
+                                value = CurrencyFormatter.formatTotal(totalBalance, currency)
                             )
                         }
                         Spacer(modifier = Modifier.height(18.dp))

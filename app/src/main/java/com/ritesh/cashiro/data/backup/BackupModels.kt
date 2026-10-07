@@ -197,7 +197,22 @@ data class PreferencesSnapshot(
 
     /** Account keys in the order the user arranged them. Absent in older backups. */
     @SerializedName("account_order")
-    val accountOrder: List<String>? = null
+    val accountOrder: List<String>? = null,
+
+    /** Hide-totals settings. Absent in older backups. */
+    @SerializedName("privacy")
+    val privacy: PrivacyPreferences? = null
+)
+
+/**
+ * Privacy settings: hiding totals and revealing them with the proximity sensor
+ */
+data class PrivacyPreferences(
+    @SerializedName("hide_totals")
+    val hideTotals: Boolean = false,
+
+    @SerializedName("reveal_on_proximity")
+    val revealOnProximity: Boolean = false
 )
 
 /**

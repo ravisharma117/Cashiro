@@ -501,7 +501,7 @@ fun FinancialOverviewCard(
             ) {
                 FinancialItem(
                     label = stringResource(R.string.net_worth),
-                    value = CurrencyFormatter.formatCurrency(netWorth, baseCurrency),
+                    value = CurrencyFormatter.formatTotal(netWorth, baseCurrency),
                     icon = Icons.Rounded.AccountBalance,
                     color = green_light,
                     iconColor = green_dark,
@@ -526,7 +526,7 @@ fun FinancialOverviewCard(
             ) {
                 FinancialItem(
                     label = stringResource(R.string.expense),
-                    value = CurrencyFormatter.formatCurrency(expense, baseCurrency),
+                    value = CurrencyFormatter.formatTotal(expense, baseCurrency),
                     icon = Icons.AutoMirrored.Rounded.TrendingDown,
                     color = red_light,
                     iconColor = red_dark,
@@ -534,7 +534,7 @@ fun FinancialOverviewCard(
                 )
                 FinancialItem(
                     label = stringResource(R.string.income),
-                    value = CurrencyFormatter.formatCurrency(income, baseCurrency),
+                    value = CurrencyFormatter.formatTotal(income, baseCurrency),
                     icon = Icons.AutoMirrored.Rounded.TrendingUp,
                     color = blue_light,
                     iconColor = blue_dark,

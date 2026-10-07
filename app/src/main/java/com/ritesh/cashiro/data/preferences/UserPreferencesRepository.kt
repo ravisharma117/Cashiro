@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.data.preferences
 
+import com.ritesh.cashiro.domain.security.AppLockMethod
 import android.content.Context
 import android.os.Build
 import androidx.datastore.core.DataStore
@@ -86,6 +87,11 @@ constructor(@ApplicationContext private val context: Context) {
         val HOME_WIDGETS_ORDER = stringPreferencesKey("home_widgets_order")
         val HIDDEN_HOME_WIDGETS = androidx.datastore.preferences.core.stringSetPreferencesKey("hidden_home_widgets")
         val ACCOUNT_ORDER = stringPreferencesKey("account_order")
+        val APP_LOCK_METHOD = stringPreferencesKey("app_lock_method")
+        val APP_LOCK_BIOMETRIC_ENABLED = booleanPreferencesKey("app_lock_biometric_enabled")
+        val SECURE_WINDOW_ENABLED = booleanPreferencesKey("secure_window_enabled")
+        val HIDE_TOTAL_AMOUNTS = booleanPreferencesKey("hide_total_amounts")
+        val REVEAL_ON_PROXIMITY = booleanPreferencesKey("reveal_on_proximity")
         val HIDE_NAVIGATION_LABELS = booleanPreferencesKey("hide_navigation_labels")
         val HIDE_PILL_INDICATOR = booleanPreferencesKey("hide_pill_indicator")
         val BLUR_EFFECTS = booleanPreferencesKey("blur_effects")
@@ -604,6 +610,66 @@ constructor(@ApplicationContext private val context: Context) {
             if (enabled) {
                 preferences[PreferencesKeys.LAST_AUTH_TIMESTAMP] = System.currentTimeMillis()
             }
+        }
+    }
+
+    /** How the lock screen proves ownership; the phone's own lock until the user sets a PIN. */
+    val appLockMethod: Flow<AppLockMethod> =
+            context.dataStore.data.map { preferences ->
+                AppLockMethod.fromName(preferences[PreferencesKeys.APP_LOCK_METHOD])
+            }
+
+    suspend fun setAppLockMethod(method: AppLockMethod) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_LOCK_METHOD] = method.name
+        }
+    }
+
+    /** Whether a fingerprint or face can stand in for the app PIN. On by default. */
+    val appLockBiometricEnabled: Flow<Boolean> =
+            context.dataStore.data.map { preferences ->
+                preferences[PreferencesKeys.APP_LOCK_BIOMETRIC_ENABLED] ?: true
+            }
+
+    suspend fun setAppLockBiometricEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_LOCK_BIOMETRIC_ENABLED] = enabled
+        }
+    }
+
+    /** Shows balances and totals masked until revealed. Off by default. */
+    val hideTotalAmounts: Flow<Boolean> =
+            context.dataStore.data.map { preferences ->
+                preferences[PreferencesKeys.HIDE_TOTAL_AMOUNTS] ?: false
+            }
+
+    suspend fun setHideTotalAmounts(hide: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HIDE_TOTAL_AMOUNTS] = hide
+        }
+    }
+
+    /** While hidden, totals show whenever a finger covers the proximity sensor. Off by default. */
+    val revealOnProximity: Flow<Boolean> =
+            context.dataStore.data.map { preferences ->
+                preferences[PreferencesKeys.REVEAL_ON_PROXIMITY] ?: false
+            }
+
+    suspend fun setRevealOnProximity(reveal: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.REVEAL_ON_PROXIMITY] = reveal
+        }
+    }
+
+    /** Hides the app in recent apps and blocks screenshots. Off by default. */
+    val secureWindowEnabled: Flow<Boolean> =
+            context.dataStore.data.map { preferences ->
+                preferences[PreferencesKeys.SECURE_WINDOW_ENABLED] ?: false
+            }
+
+    suspend fun setSecureWindowEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SECURE_WINDOW_ENABLED] = enabled
         }
     }
 

@@ -1,5 +1,7 @@
 package com.ritesh.cashiro.presentation.ui.features.settings.applock
 
+import com.ritesh.cashiro.data.security.PinStore
+import com.ritesh.cashiro.domain.security.AppLockMethod
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AppLockViewModel @Inject constructor(
     private val appLockRepository: AppLockRepository,
-    private val biometricAuthManager: BiometricAuthManager
+    private val biometricAuthManager: BiometricAuthManager,
+    private val pinStore: PinStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AppLockUiState())
@@ -29,16 +32,21 @@ class AppLockViewModel @Inject constructor(
         combine(
             appLockRepository.isAppLockEnabled,
             appLockRepository.timeoutMinutes,
-            appLockRepository.shouldLockAppFlow()
-        ) { isEnabled, timeoutMinutes, shouldLock ->
-            Triple(isEnabled, timeoutMinutes, shouldLock)
+            appLockRepository.shouldLockAppFlow(),
+            appLockRepository.lockMethod,
+            pinStore.hasPin
+        ) { isEnabled, timeoutMinutes, shouldLock, method, hasPin ->
+            LockSnapshot(isEnabled, timeoutMinutes, shouldLock, method, hasPin)
         }
-            .onEach { (isEnabled, timeoutMinutes, shouldLock) ->
+            .onEach { snapshot ->
                 _uiState.update {
                     it.copy(
-                        isLockEnabled = isEnabled,
-                        timeoutMinutes = timeoutMinutes,
-                        isLocked = shouldLock && isEnabled
+                        isLockEnabled = snapshot.isEnabled,
+                        timeoutMinutes = snapshot.timeoutMinutes,
+                        isLocked = snapshot.shouldLock && snapshot.isEnabled,
+                        lockMethod = snapshot.method,
+                        hasPin = snapshot.hasPin,
+                        isLoaded = true
                     )
                 }
             }
@@ -151,12 +159,31 @@ class AppLockViewModel @Inject constructor(
     }
 }
 
+private data class LockSnapshot(
+    val isEnabled: Boolean,
+    val timeoutMinutes: Int,
+    val shouldLock: Boolean,
+    val method: AppLockMethod,
+    val hasPin: Boolean
+)
+
 data class AppLockUiState(
     val isLockEnabled: Boolean = false,
+    /** The lock settings have been read; before that the screen must not pick a way to unlock. */
+    val isLoaded: Boolean = false,
+    val lockMethod: AppLockMethod = AppLockMethod.DEVICE_CREDENTIAL,
+    val hasPin: Boolean = false,
     val isLocked: Boolean = false,
     val timeoutMinutes: Int = 1,
     val canUseBiometric: Boolean = false,
     val biometricCapability: BiometricCapability = BiometricCapability.Unknown,
     val authenticationError: String? = null,
     val authenticationSucceeded: Boolean = false
-)
+) {
+    /**
+     * The lock screen shows the PIN pad. Falls back to the phone's own lock if the method says
+     * PIN but no PIN exists (for example after restoring settings onto a new phone), so nobody
+     * is locked out by that.
+     */
+    val usesPin: Boolean get() = lockMethod == AppLockMethod.APP_PIN && hasPin
+}

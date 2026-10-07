@@ -285,7 +285,7 @@ text = {
 
                 // Balance
                 Text(
-                    text = CurrencyFormatter.formatCurrency(
+                    text = CurrencyFormatter.formatTotal(
                         account.balance,
                         account.currency
                     ),

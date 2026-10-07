@@ -96,7 +96,7 @@ import com.ritesh.cashiro.presentation.ui.features.settings.currency.CurrencySet
 import com.ritesh.cashiro.presentation.ui.features.settings.appearance.AppearanceScreen
 import com.ritesh.cashiro.presentation.ui.features.settings.appearance.ThemeViewModel
 import com.ritesh.cashiro.presentation.ui.features.settings.applock.AppLockScreen
-import com.ritesh.cashiro.presentation.ui.features.settings.dataprivacy.DataPrivacyScreen
+import com.ritesh.cashiro.presentation.ui.features.settings.security.SecurityScreen
 import com.ritesh.cashiro.presentation.ui.features.settings.cloudbackup.BackupSyncScreen
 import com.ritesh.cashiro.presentation.ui.features.settings.developer.DeveloperScreen
 import com.ritesh.cashiro.presentation.ui.features.settings.notifications.NotificationScreen
@@ -375,10 +375,8 @@ fun CashiroNavHost(
                     popEnterTransition = CashiroTransitions.horizontalSlidePopEnter,
                     popExitTransition = CashiroTransitions.horizontalSlidePopExit
                 ) {
-                    DataPrivacyScreen(
-                        onNavigateBack = { navController.safePopBackStack() },
-                        onNavigateToAccounts = { navController.safeNavigate(ManageAccounts) },
-                        blurEffects = themeUiState.blurEffects
+                    SecurityScreen(
+                        onNavigateBack = { navController.safePopBackStack() }
                     )
                 }
 
