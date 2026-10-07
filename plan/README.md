@@ -16,7 +16,7 @@ In every plan, `$APP` means `app/src/main/java/com/ritesh/cashiro`.
 | 4 | [Account reordering](plan%204/plan.md) | 8 | 3 | `feature/account-reorder` | ☑ |
 | 5 | [App Lock PIN & Security settings](plan%205/plan.md) | 7, 24 (Phase 6) | 1 | `feature/app-lock` | ◐ built, device check open |
 | 6 | [Privacy mode](plan%206/plan.md) | 7 | 5 | `feature/app-lock` (built with Plan 5) | ◐ totals only; device check open |
-| 7 | [Bottom navigation & More](plan%207/plan.md) | 10, 26 | 1 | `feature/navigation` | ☐ |
+| 7 | [Bottom navigation & More](plan%207/plan.md) | 10, 26 | 1 | `feature/navigation` | skipped (not needed) |
 | 8 | [Category transactions + analysis](plan%208/plan.md) | 10 | 7 | `feature/category-analysis` | ☐ |
 | 9 | [Home widgets completion](plan%209/plan.md) | 9 | 4, 7 | `feature/home-customization` | ☐ |
 | 10 | [Unified transaction engine](plan%2010/plan.md) | 13, 14, 23 | 3 | `feature/transaction-engine` | ☐ |
