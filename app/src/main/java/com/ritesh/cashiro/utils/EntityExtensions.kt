@@ -1,5 +1,7 @@
 package com.ritesh.cashiro.utils
 
+import com.ritesh.cashiro.domain.model.AccountKind
+import com.ritesh.cashiro.domain.model.accountKindOf
 import com.ritesh.cashiro.data.database.entity.AccountBalanceEntity
 import com.ritesh.cashiro.data.database.entity.CardEntity
 import com.ritesh.cashiro.data.database.entity.SubscriptionEntity
@@ -39,3 +41,9 @@ fun CardEntity.formatLastBalance(): String =
  */
 fun AccountBalanceEntity.formatCreditLimit(): String =
     CurrencyFormatter.formatCurrency(creditLimit ?: java.math.BigDecimal.ZERO, currency)
+
+/**
+ * The kind of account this balance row belongs to
+ */
+val AccountBalanceEntity.kind: AccountKind
+    get() = accountKindOf(bankName, accountLast4, isCreditCard, isWallet)

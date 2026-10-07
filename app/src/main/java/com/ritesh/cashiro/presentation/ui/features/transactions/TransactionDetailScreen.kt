@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.transactions
 
+import com.ritesh.cashiro.domain.model.CashAccount
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -1621,7 +1622,7 @@ private fun EditableExtractedInfoCard(
                                         )
                                         if (selectedAccount != null) {
                                             Text(
-                                                text = if (selectedAccount?.accountLast4 == "wallet") "${selectedAccount?.accountLast4}" else "••${selectedAccount?.accountLast4}",
+                                                text = if (selectedAccount?.accountLast4 == CashAccount.WALLET_LAST4) "${selectedAccount?.accountLast4}" else "••${selectedAccount?.accountLast4}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -1676,7 +1677,7 @@ private fun EditableExtractedInfoCard(
                                         )
                                         if (targetAccount != null) {
                                             Text(
-                                                text = if (targetAccount?.accountLast4 == "wallet") "${targetAccount?.accountLast4}" else "••${targetAccount?.accountLast4}",
+                                                text = if (targetAccount?.accountLast4 == CashAccount.WALLET_LAST4) "${targetAccount?.accountLast4}" else "••${targetAccount?.accountLast4}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -1782,7 +1783,7 @@ private fun EditableExtractedInfoCard(
                                 )
                                 if (selectedAccount != null) {
                                     Text(
-                                        text = if (selectedAccount?.accountLast4 == "wallet") "${selectedAccount?.accountLast4}" else "••${selectedAccount?.accountLast4}",
+                                        text = if (selectedAccount?.accountLast4 == CashAccount.WALLET_LAST4) "${selectedAccount?.accountLast4}" else "••${selectedAccount?.accountLast4}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

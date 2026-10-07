@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.accounts
 
+import com.ritesh.cashiro.domain.model.CashAccount
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -277,8 +278,8 @@ fun EditAccountSheet(
                         onClick = { 
                             isWallet = true
                             isCreditCard = false
-                            accountLast4 = "wallet"
-                            bankName = "Cash"
+                            accountLast4 = CashAccount.WALLET_LAST4
+                            bankName = CashAccount.BANK_NAME
                             iconName = "type_finance_dollar_banknote"
                             iconResId = R.drawable.type_finance_dollar_banknote
                             colorHex = "#8BC34A"

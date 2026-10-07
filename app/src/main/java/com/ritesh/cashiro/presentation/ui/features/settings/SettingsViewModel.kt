@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.settings
 
+import com.ritesh.cashiro.domain.model.CashAccount
 import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
@@ -740,8 +741,8 @@ class SettingsViewModel @Inject constructor(
                 // Cash (Wallet)
                 accountBalanceRepository.insertBalance(
                     AccountBalanceEntity(
-                        bankName = "Cash",
-                        accountLast4 = "wallet", // Special identifier for wallet
+                        bankName = CashAccount.BANK_NAME,
+                        accountLast4 = CashAccount.WALLET_LAST4,
                         balance = BigDecimal(2500),
                         timestamp = now,
                         sourceType = "MANUAL",

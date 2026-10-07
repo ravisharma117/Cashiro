@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.transactions
 
+import com.ritesh.cashiro.domain.model.CashAccount
 import com.ritesh.cashiro.utils.SubscriptionUtils
 
 import android.content.Context
@@ -508,7 +509,7 @@ class TransactionDetailViewModel @Inject constructor(
             TransactionType.CREDIT -> "Credit Bill"
             TransactionType.TRANSFER -> {
                 val targetAccount = _uiState.value.editableTransaction?.toAccount
-                if (targetAccount == "wallet") "Cash Withdrawal" else "Self Transfer"
+                if (targetAccount == CashAccount.WALLET_LAST4) "Cash Withdrawal" else "Self Transfer"
             }
 
             TransactionType.INVESTMENT -> "Investment"
@@ -609,7 +610,7 @@ class TransactionDetailViewModel @Inject constructor(
         // Update category if type is TRANSFER
         _uiState.value.editableTransaction?.let { txn ->
             if (txn.transactionType == TransactionType.TRANSFER) {
-                val newCategory = if (account?.accountLast4 == "wallet") {
+                val newCategory = if (account?.accountLast4 == CashAccount.WALLET_LAST4) {
                     "Cash Withdrawal"
                 } else {
                     "Self Transfer"
