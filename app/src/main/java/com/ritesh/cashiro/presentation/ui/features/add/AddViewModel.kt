@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.add
 
+import com.ritesh.cashiro.domain.usecase.AccountOrderUseCase
 import com.ritesh.cashiro.utils.SubscriptionUtils
 
 import android.content.Context
@@ -49,6 +50,7 @@ constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val subcategoryRepository: SubcategoryRepository,
     private val accountBalanceRepository: AccountBalanceRepository,
+    private val accountOrderUseCase: AccountOrderUseCase,
     private val subscriptionRepository: SubscriptionRepository,
     private val updateSubscriptionUseCase: UpdateSubscriptionUseCase,
     private val currencyRepository: CurrencyRepository,
@@ -91,8 +93,8 @@ constructor(
             )
 
     // Accounts for dropdown
-    val accounts = accountBalanceRepository
-            .getAllLatestBalances()
+    val accounts = accountOrderUseCase
+            .orderedAccounts()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),

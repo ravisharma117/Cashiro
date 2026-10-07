@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.lendborrow
 
+import com.ritesh.cashiro.domain.usecase.AccountOrderUseCase
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -64,6 +65,7 @@ class LendBorrowViewModel @Inject constructor(
     private val addEditTransactionUseCase: AddEditLendBorrowTransactionUseCase,
     private val currencyRepository: CurrencyRepository,
     private val accountBalanceRepository: AccountBalanceRepository,
+    private val accountOrderUseCase: AccountOrderUseCase,
     private val categoryRepository: CategoryRepository,
     val attachmentService: AttachmentService,
     savedStateHandle: SavedStateHandle
@@ -82,7 +84,7 @@ class LendBorrowViewModel @Inject constructor(
                 getSummaryUseCase(),
                 getPersonsUseCase(),
                 currencyRepository.effectiveBaseCurrencyCode,
-                accountBalanceRepository.getAllLatestBalances(),
+                accountOrderUseCase.orderedAccounts(),
                 categoryRepository.getAllCategories()
             ) { summary, persons, currency, accounts, categories ->
                 _uiState.update { state ->

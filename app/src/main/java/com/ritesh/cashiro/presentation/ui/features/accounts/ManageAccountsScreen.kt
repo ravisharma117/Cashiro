@@ -29,6 +29,7 @@ import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.LinkOff
 import androidx.compose.material.icons.rounded.MoreHoriz
+import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -127,6 +128,8 @@ fun ManageAccountsScreen(
     var accountToDelete by remember { mutableStateOf<AccountBalanceEntity?>(null) }
     var showHiddenAccounts by remember { mutableStateOf(false) }
     var showAddSheet by remember { mutableStateOf(false) }
+    var showReorderSheet by remember { mutableStateOf(false) }
+    val reorderSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showEditSheet by remember { mutableStateOf(false) }
     var accountToEdit by remember {
         mutableStateOf<AccountBalanceEntity?>(null)
@@ -190,7 +193,11 @@ fun ManageAccountsScreen(
                 hazeState = hazeState,
                 hasBackButton = true,
                 navigationContent = { NavigationContent(onNavigateBack) },
-                actionContent = {}
+                actionContent = {
+                    if (uiState.accounts.size > 1) {
+                        ReorderAction(onClick = { showReorderSheet = true })
+                    }
+                }
             ) },
         floatingActionButton = {
             val fabContainerColor =  MaterialTheme.colorScheme.primaryContainer
@@ -848,6 +855,17 @@ fun ManageAccountsScreen(
                 }
             )
         }
+    }
+
+    // Reorder Accounts Sheet
+    if (showReorderSheet) {
+        ReorderAccountsSheet(
+            onDismissRequest = { showReorderSheet = false },
+            sheetState = reorderSheetState,
+            accounts = uiState.accounts,
+            hiddenKeys = uiState.hiddenAccounts,
+            onOrderChanged = { manageAccountsViewModel.saveAccountOrder(it) }
+        )
     }
 
     // Add Account Sheet
@@ -1597,4 +1615,22 @@ private fun LinkCardDialog(
     )
 }
 
-
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun ReorderAction(onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.padding(end = 8.dp),
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onBackground
+        ),
+        shapes = IconButtonDefaults.shapes()
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.SwapVert,
+            contentDescription = stringResource(R.string.reorder_accounts),
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}

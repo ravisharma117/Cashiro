@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.home
 
+import com.ritesh.cashiro.domain.usecase.AccountOrderUseCase
 import android.content.Context
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -59,6 +60,7 @@ class HomeViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val subscriptionRepository: SubscriptionRepository,
     private val accountBalanceRepository: AccountBalanceRepository,
+    private val accountOrderUseCase: AccountOrderUseCase,
     private val llmRepository: LlmRepository,
     private val currencyConversionService: CurrencyConversionService,
     private val currencyRepository: CurrencyRepository,
@@ -212,7 +214,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             // Load account balances and react to currency changes
             combine(
-                accountBalanceRepository.getAllLatestBalances(),
+                accountOrderUseCase.orderedAccounts(),
                 selectedCurrencyCombined,
                 currencyConversionService.rateChangeTrigger
             ) { allBalances, selectedCurrency, _ ->
@@ -595,7 +597,7 @@ class HomeViewModel @Inject constructor(
                 sharedPrefs.getStringSet("hidden_accounts", emptySet()) ?: emptySet()
 
             // Re-fetch all accounts and filter
-            accountBalanceRepository.getAllLatestBalances().first().let { allBalances: List<AccountBalanceEntity> ->
+            accountOrderUseCase.orderedAccounts().first().let { allBalances: List<AccountBalanceEntity> ->
                 val visibleBalances: List<AccountBalanceEntity> = allBalances.filter { account: AccountBalanceEntity ->
                     val key = "${account.bankName}_${account.accountLast4}"
                     !hiddenAccounts.contains(key)
@@ -684,7 +686,7 @@ class HomeViewModel @Inject constructor(
     fun refreshAccountBalances() {
         viewModelScope.launch {
             // Force refresh the account balances by fetching once (prevents memory leaks)
-            val allBalances = accountBalanceRepository.getAllLatestBalances().first()
+            val allBalances = accountOrderUseCase.orderedAccounts().first()
             val hiddenAccounts = sharedPrefs.getStringSet("hidden_accounts", emptySet()) ?: emptySet()
 
             // Filter out hidden accounts

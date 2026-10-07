@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.budgets
 
+import com.ritesh.cashiro.domain.usecase.AccountOrderUseCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ritesh.cashiro.data.database.entity.BudgetEntity
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.collectLatest
 class BudgetViewModel @Inject constructor(
     private val budgetRepository: BudgetRepository,
     private val accountBalanceDao: AccountBalanceDao,
+    private val accountOrderUseCase: AccountOrderUseCase,
     private val currencyRepository: CurrencyRepository,
     private val currencyConversionService: CurrencyConversionService,
     private val lendBorrowRepository: LendBorrowRepository
@@ -62,7 +64,7 @@ class BudgetViewModel @Inject constructor(
 
     private fun loadAccounts() {
         viewModelScope.launch {
-            accountBalanceDao.getAllLatestBalances().collect { accounts ->
+            accountOrderUseCase.orderedAccounts().collect { accounts ->
                 _uiState.update { it.copy(allAccounts = accounts) }
             }
         }
