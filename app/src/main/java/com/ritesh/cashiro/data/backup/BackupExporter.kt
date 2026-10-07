@@ -317,6 +317,9 @@ class BackupExporter @Inject constructor(
                         defaultCurrencyCode = defaultCurrencyCode,
                         customCurrencies = customCurrencies
                     )
+                } else null,
+                accountOrder = if (config.includeAppPreferences) {
+                    userPreferencesRepository.accountOrder.first()
                 } else null
             )
         )

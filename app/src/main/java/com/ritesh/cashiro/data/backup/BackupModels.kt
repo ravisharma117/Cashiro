@@ -193,7 +193,11 @@ data class PreferencesSnapshot(
     val homeWidgets: HomeWidgetPreferences? = null,
 
     @SerializedName("currency")
-    val currency: CurrencyPreferences? = null
+    val currency: CurrencyPreferences? = null,
+
+    /** Account keys in the order the user arranged them. Absent in older backups. */
+    @SerializedName("account_order")
+    val accountOrder: List<String>? = null
 )
 
 /**

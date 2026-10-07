@@ -85,6 +85,7 @@ constructor(@ApplicationContext private val context: Context) {
         // Home Widget Preferences
         val HOME_WIDGETS_ORDER = stringPreferencesKey("home_widgets_order")
         val HIDDEN_HOME_WIDGETS = androidx.datastore.preferences.core.stringSetPreferencesKey("hidden_home_widgets")
+        val ACCOUNT_ORDER = stringPreferencesKey("account_order")
         val HIDE_NAVIGATION_LABELS = booleanPreferencesKey("hide_navigation_labels")
         val HIDE_PILL_INDICATOR = booleanPreferencesKey("hide_pill_indicator")
         val BLUR_EFFECTS = booleanPreferencesKey("blur_effects")
@@ -785,6 +786,25 @@ constructor(@ApplicationContext private val context: Context) {
     suspend fun updateHomeWidgetsOrder(order: List<HomeWidget>) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.HOME_WIDGETS_ORDER] = order.joinToString(",") { it.name }
+        }
+    }
+
+    /** Account keys in the order the user arranged them; empty means no custom order. */
+    val accountOrder: Flow<List<String>> =
+        context.dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.ACCOUNT_ORDER]
+                ?.split("\n")
+                ?.filter { it.isNotEmpty() }
+                ?: emptyList()
+        }
+
+    suspend fun updateAccountOrder(order: List<String>) {
+        context.dataStore.edit { preferences ->
+            if (order.isEmpty()) {
+                preferences.remove(PreferencesKeys.ACCOUNT_ORDER)
+            } else {
+                preferences[PreferencesKeys.ACCOUNT_ORDER] = order.joinToString("\n")
+            }
         }
     }
 

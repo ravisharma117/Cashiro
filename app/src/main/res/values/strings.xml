@@ -324,6 +324,9 @@
     <string name="edit_widgets">Edit Widgets</string>
     <string name="edit_widgets_desc">Reorder or hide sections on your home screen.</string>
     <string name="reorder">Reorder</string>
+    <string name="reorder_accounts">Reorder accounts</string>
+    <string name="reorder_accounts_desc">Drag to arrange your accounts. This order is used on Home, when adding transactions and everywhere accounts are listed.</string>
+    <string name="account_hidden_label">Hidden</string>
     <string name="press_back_again_to_close">Press back again to close the app</string>
     <string name="transaction_deleted">Transaction deleted</string>
     <string name="undo">Undo</string>

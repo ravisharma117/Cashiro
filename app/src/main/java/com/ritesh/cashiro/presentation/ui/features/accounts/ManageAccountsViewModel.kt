@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.accounts
 
+import com.ritesh.cashiro.domain.usecase.AccountOrderUseCase
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -62,6 +63,7 @@ class ManageAccountsViewModel
 constructor(
     @ApplicationContext private val context: Context,
     private val accountBalanceRepository: AccountBalanceRepository,
+    private val accountOrderUseCase: AccountOrderUseCase,
     private val cardRepository: CardRepository,
     private val transactionRepository: TransactionRepository,
     private val userPreferencesRepository: UserPreferencesRepository
@@ -123,7 +125,7 @@ constructor(
 
     private fun loadAccounts() {
         viewModelScope.launch {
-            accountBalanceRepository.getAllLatestBalances().collect { accounts ->
+            accountOrderUseCase.orderedAccounts().collect { accounts ->
                 _uiState.update { it.copy(accounts = accounts) }
             }
         }
@@ -364,6 +366,11 @@ constructor(
         }
     }
 
+    /** Saves the order the user arranged the accounts in. */
+    fun saveAccountOrder(accounts: List<AccountBalanceEntity>) {
+        viewModelScope.launch { accountOrderUseCase.saveOrder(accounts) }
+    }
+
     fun toggleAccountVisibility(bankName: String, accountLast4: String) {
         val key = "${bankName}_${accountLast4}"
         val hidden = _uiState.value.hiddenAccounts.toMutableSet()
@@ -540,6 +547,7 @@ constructor(
 
                 // Delete all balance records for this account
                 val deletedCount = accountBalanceRepository.deleteAccount(bankName, accountLast4)
+                accountOrderUseCase.onAccountRemoved(bankName, accountLast4)
 
                 // Remove from hidden accounts if present
                 val key = "${bankName}_${accountLast4}"
@@ -599,6 +607,7 @@ constructor(
                         accountLast4,
                         newBankName
                     )
+                    accountOrderUseCase.onAccountRenamed(oldBankName, newBankName, accountLast4)
 
                     // Update hidden accounts preference if bank name changed
                     val oldKey = "${oldBankName}_${accountLast4}"
@@ -688,6 +697,7 @@ constructor(
 
                     // Delete account balances
                     accountBalanceRepository.deleteAccount(source.bankName, source.accountLast4)
+                    accountOrderUseCase.onAccountRemoved(source.bankName, source.accountLast4)
                 }
 
                 // Reload data

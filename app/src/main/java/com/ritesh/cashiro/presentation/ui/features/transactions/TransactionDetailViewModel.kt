@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.transactions
 
+import com.ritesh.cashiro.domain.usecase.AccountOrderUseCase
 import com.ritesh.cashiro.domain.model.CashAccount
 import com.ritesh.cashiro.utils.SubscriptionUtils
 
@@ -58,6 +59,7 @@ class TransactionDetailViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val subcategoryRepository: SubcategoryRepository,
     private val accountBalanceRepository: AccountBalanceRepository,
+    private val accountOrderUseCase: AccountOrderUseCase,
     private val subscriptionRepository: SubscriptionRepository,
     private val currencyConversionService: CurrencyConversionService,
     private val currencyRepository: CurrencyRepository,
@@ -121,7 +123,7 @@ class TransactionDetailViewModel @Inject constructor(
     private val sharedPrefs =
         context.getSharedPreferences("account_prefs", Context.MODE_PRIVATE)
 
-    val availableAccounts: StateFlow<List<AccountBalanceEntity>> = accountBalanceRepository.getAllLatestBalances()
+    val availableAccounts: StateFlow<List<AccountBalanceEntity>> = accountOrderUseCase.orderedAccounts()
         .map { balances ->
             val hiddenAccounts =
                 sharedPrefs.getStringSet("hidden_accounts", emptySet()) ?: emptySet()

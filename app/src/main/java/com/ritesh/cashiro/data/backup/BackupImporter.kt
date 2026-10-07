@@ -846,5 +846,10 @@ class BackupImporter @Inject constructor(
                 userPreferencesRepository.addCustomCurrency(customCurrency)
             }
         }
+
+        // Account order
+        preferences.accountOrder?.takeIf { it.isNotEmpty() }?.let {
+            userPreferencesRepository.updateAccountOrder(it)
+        }
     }
 }
