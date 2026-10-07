@@ -1,5 +1,20 @@
 # Plan 4 — Account reordering
 
+## Outcome (2026-10-07)
+
+Implemented as planned, with the preference-list storage (no migration). Differences from the steps below:
+
+- The ordering logic is `AccountOrdering` (pure, tested) and `AccountOrderUseCase` (ordered flow, save, rename and remove), instead of a new method on `AccountBalanceRepository`. This avoids changing the repository constructor that its existing tests build.
+- Accounts not in the stored order keep the order they arrive in (balance, highest first) and go after the listed ones. With no stored order nothing changes, so users who never reorder see no difference. This replaces the "bank, cash, card, wallet" default in step 2.
+- Reordering happens in a bottom sheet opened from a button in the Manage Accounts top bar, not inline in the list. Order is saved when a drag ends.
+- Switched to the ordered source: Home (carousel and refresh paths), Manage Accounts, Add transaction, transaction detail, budgets, lend / borrow and person detail. Screens that only compute totals or build maps (analytics, profile, webhooks, AI context, onboarding) were left on the plain query.
+- Rename keeps the account's position; delete and merge remove it from the order.
+- Backup: `account_order` is exported and restored; older backups without it import normally.
+- Not done: the transaction filter's account chips were not checked for ordering.
+- Found, not fixed: backups export the Home widget layout but the importer never restores it.
+
+Tests: `AccountOrderingTest` (11).
+
 ## Goal
 
 Let the user drag accounts into a preferred order and apply that order everywhere accounts are listed.
