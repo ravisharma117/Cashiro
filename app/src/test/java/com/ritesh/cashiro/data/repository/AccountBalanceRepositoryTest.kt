@@ -5,6 +5,7 @@ import com.ritesh.cashiro.data.database.dao.AccountBalanceDao
 import com.ritesh.cashiro.data.database.dao.AccountBalanceTransactionInfo
 import com.ritesh.cashiro.data.database.entity.AccountBalanceEntity
 import com.ritesh.cashiro.data.database.entity.TransactionType
+import com.ritesh.cashiro.domain.model.CashAccount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -186,6 +187,81 @@ class AccountBalanceRepositoryTest {
         )
 
         assertEquals(emptyMap(), dao.updatedBalances)
+    }
+
+    @Test
+    fun ensureCashAccountCreatesZeroBalanceCashWalletOnce() = runTest {
+        val dao = FakeAccountBalanceDao()
+        val repository = AccountBalanceRepository(dao, ContextWrapper(null))
+
+        val first = repository.ensureCashAccount("INR")
+        val second = repository.ensureCashAccount("INR")
+
+        assertEquals(1, dao.insertedBalances.size)
+        assertEquals(first.id, second.id)
+        assertEquals(CashAccount.BANK_NAME, first.bankName)
+        assertEquals(CashAccount.WALLET_LAST4, first.accountLast4)
+        assertEquals(BigDecimal.ZERO, first.balance)
+        assertEquals("INR", first.currency)
+        assertEquals(true, first.isWallet)
+        assertEquals(false, first.isCreditCard)
+    }
+
+    @Test
+    fun ensureCashAccountKeepsExistingBalanceAndCurrency() = runTest {
+        val dao = FakeAccountBalanceDao()
+        val repository = AccountBalanceRepository(dao, ContextWrapper(null))
+        dao.seedBalance(
+            AccountBalanceEntity(
+                bankName = CashAccount.BANK_NAME,
+                accountLast4 = CashAccount.WALLET_LAST4,
+                balance = BigDecimal("8500"),
+                timestamp = LocalDateTime.of(2026, 5, 1, 10, 0),
+                isWallet = true,
+                currency = "USD"
+            )
+        )
+
+        val cash = repository.ensureCashAccount("INR")
+
+        assertEquals(0, dao.insertedBalances.size)
+        assertEquals(BigDecimal("8500"), cash.balance)
+        assertEquals("USD", cash.currency)
+    }
+
+    @Test
+    fun syncCashCurrencyUpdatesCurrencyAndKeepsBalance() = runTest {
+        val dao = FakeAccountBalanceDao()
+        val repository = AccountBalanceRepository(dao, ContextWrapper(null))
+        dao.seedBalance(
+            AccountBalanceEntity(
+                bankName = CashAccount.BANK_NAME,
+                accountLast4 = CashAccount.WALLET_LAST4,
+                balance = BigDecimal("8500"),
+                timestamp = LocalDateTime.of(2026, 5, 1, 10, 0),
+                isWallet = true,
+                currency = "USD"
+            )
+        )
+
+        repository.syncCashCurrency("INR")
+
+        val latest = repository.getLatestBalance(CashAccount.BANK_NAME, CashAccount.WALLET_LAST4)
+        assertNotNull(latest)
+        assertEquals("INR", latest.currency)
+        assertEquals(BigDecimal("8500"), latest.balance)
+        assertEquals(1, dao.insertedBalances.size)
+    }
+
+    @Test
+    fun syncCashCurrencyDoesNothingWhenCurrencyAlreadyMatches() = runTest {
+        val dao = FakeAccountBalanceDao()
+        val repository = AccountBalanceRepository(dao, ContextWrapper(null))
+        repository.ensureCashAccount("INR")
+
+        repository.syncCashCurrency("INR")
+
+        assertEquals(1, dao.insertedBalances.size)
     }
 
     @Test

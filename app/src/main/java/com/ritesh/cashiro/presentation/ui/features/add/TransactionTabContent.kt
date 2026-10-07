@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.add
 
+import com.ritesh.cashiro.domain.model.CashAccount
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.animateContentSize
@@ -653,7 +654,7 @@ fun TransactionTabContent(
                                         )
                                         if (uiState.selectedAccount != null) {
                                             Text(
-                                                text = if (uiState.selectedAccount?.accountLast4 == "wallet") "${uiState.selectedAccount?.accountLast4}" else "••${uiState.selectedAccount?.accountLast4}",
+                                                text = if (uiState.selectedAccount?.accountLast4 == CashAccount.WALLET_LAST4) "${uiState.selectedAccount?.accountLast4}" else "••${uiState.selectedAccount?.accountLast4}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -707,7 +708,7 @@ fun TransactionTabContent(
                                         )
                                         if (uiState.targetAccount != null) {
                                             Text(
-                                                text = if (uiState.targetAccount?.accountLast4 == "wallet") "${uiState.targetAccount?.accountLast4}" else "••${uiState.targetAccount?.accountLast4}",
+                                                text = if (uiState.targetAccount?.accountLast4 == CashAccount.WALLET_LAST4) "${uiState.targetAccount?.accountLast4}" else "••${uiState.targetAccount?.accountLast4}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -858,7 +859,7 @@ fun TransactionTabContent(
                                 )
                                 if (uiState.selectedAccount != null) {
                                     Text(
-                                        text = if (uiState.selectedAccount?.accountLast4 == "wallet") "${uiState.selectedAccount?.accountLast4}" else "••${uiState.selectedAccount?.accountLast4}",
+                                        text = if (uiState.selectedAccount?.accountLast4 == CashAccount.WALLET_LAST4) "${uiState.selectedAccount?.accountLast4}" else "••${uiState.selectedAccount?.accountLast4}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

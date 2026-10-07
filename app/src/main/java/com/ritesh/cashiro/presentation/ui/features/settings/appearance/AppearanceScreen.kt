@@ -58,6 +58,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.ritesh.cashiro.R
@@ -468,8 +469,8 @@ fun AppearanceScreen(
                         AppLogoOption(
                             name = stringResource(R.string.logo_original),
                             icon = AppIcon.ORIGINAL,
-                            backgroundColor = Color(0xFF1F1F1F),
-                            drawableResId = R.drawable.cashiro_original,
+                            backgroundColor = colorResource(R.color.logo_original_bg),
+                            drawableResId = R.drawable.ic_logo_original_fg,
                             isSelected = themeUiState.currentAppIcon == AppIcon.ORIGINAL,
                             onClick = {
                                 IconSwitchingUtils.switchAppIcon(context, AppIcon.ORIGINAL)

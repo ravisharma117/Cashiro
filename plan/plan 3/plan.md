@@ -1,5 +1,18 @@
 # Plan 3 — Account types & Cash account
 
+## Outcome (2026-10-07)
+
+Implemented differently from the steps below, after reading the code more closely:
+
+- The app already had a built-in Cash wallet (`bankName = "Cash"`, `accountLast4 = "wallet"`), created when Manage Accounts first opened, selectable in transactions and counted in totals.
+- **No `account_type` column and no migration.** The account kind is derived from data that already exists: `AccountKind` (`BANK`, `CASH`, `CREDIT_CARD`, `WALLET`) via `accountKindOf(...)` and the `AccountBalanceEntity.kind` extension. A stored column would have to be copied by every one of the dozen places that insert balance rows; a missed one would silently reset an account to `BANK`.
+- `CashAccount` in `domain/model/AccountKind.kt` is the single definition of the cash key; the scattered `"Cash"` / `"wallet"` literals now use it.
+- `AccountBalanceRepository.ensureCashAccount(currency)` and `syncCashCurrency(currency)` replace four copies of the same code. Onboarding and main-account changes now create Cash if it is missing, so it no longer depends on opening Manage Accounts.
+- Database stays at version 62; the next migration (Plan 10 or later) is 62 → 63.
+- Not done: a separate Cash button in the account type selector (Cash always exists, so there is nothing to add), and the account-detail tweaks in step 9.
+
+Tests: `AccountKindTest` (7) and four new cases in `AccountBalanceRepositoryTest`.
+
 ## Goal
 
 Make Cash a proper account that behaves like any other, and give every account an explicit type (bank, cash, credit card, wallet) that later plans can rely on.

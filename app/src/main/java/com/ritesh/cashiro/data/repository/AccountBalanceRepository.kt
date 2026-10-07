@@ -1,5 +1,7 @@
 package com.ritesh.cashiro.data.repository
 
+import com.ritesh.cashiro.R
+import com.ritesh.cashiro.domain.model.CashAccount
 import android.content.Context
 import com.ritesh.cashiro.data.database.dao.AccountBalanceDao
 import com.ritesh.cashiro.data.database.entity.AccountBalanceEntity
@@ -28,6 +30,43 @@ class AccountBalanceRepository @Inject constructor(
         return accountBalanceDao.insertBalance(balanceWithIconName)
     }
     
+    /**
+     * Returns the built-in Cash account, creating it with a zero balance if it does not exist yet.
+     */
+    suspend fun ensureCashAccount(currency: String): AccountBalanceEntity {
+        getLatestBalance(CashAccount.BANK_NAME, CashAccount.WALLET_LAST4)?.let { return it }
+        val cash = AccountBalanceEntity(
+            bankName = CashAccount.BANK_NAME,
+            accountLast4 = CashAccount.WALLET_LAST4,
+            balance = BigDecimal.ZERO,
+            timestamp = LocalDateTime.now(),
+            sourceType = "MANUAL",
+            isWallet = true,
+            iconResId = R.drawable.type_finance_dollar_banknote,
+            iconName = CashAccount.ICON_NAME,
+            color = CashAccount.COLOR,
+            currency = currency
+        )
+        return cash.copy(id = insertBalance(cash))
+    }
+
+    /**
+     * Keeps the Cash account in the given currency, creating the account if needed.
+     */
+    suspend fun syncCashCurrency(currency: String) {
+        val cash = ensureCashAccount(currency)
+        if (cash.currency != currency) {
+            insertBalance(
+                cash.copy(
+                    id = 0,
+                    currency = currency,
+                    timestamp = LocalDateTime.now(),
+                    sourceType = "MAIN_ACCOUNT_SYNC"
+                )
+            )
+        }
+    }
+
     suspend fun getLatestBalance(bankName: String, accountLast4: String): AccountBalanceEntity? {
         return accountBalanceDao.getLatestBalance(bankName, accountLast4)
     }

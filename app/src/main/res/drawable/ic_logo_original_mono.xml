@@ -6,18 +6,18 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="@color/logo_paisa_letter"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M28.42,74.42 L28.42,36.58 L37.02,36.58 L53.36,61.52 L53.36,72.7 L36.16,46.9 L36.16,74.42 Z" />
     <path
-        android:fillColor="@color/logo_paisa_letter"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M41.75,36.58 L44.76,36.58 L56.37,54.21 L56.37,58.94 Z" />
     <path
-        android:fillColor="@color/logo_paisa_letter"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M68.84,53.35 L76.58,42.17 L76.58,74.42 L68.84,74.42 Z" />
     <path
-        android:fillColor="@color/logo_paisa_blade_light"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M46.82,69.86 L50.35,72.27 L83.46,23.68 Z" />
     <path
-        android:fillColor="@color/logo_paisa_blade_dark"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M50.35,72.27 L53.88,74.68 L83.46,23.68 Z" />
 </vector>

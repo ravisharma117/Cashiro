@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.presentation.ui.features.lendborrow
 
+import com.ritesh.cashiro.domain.model.CashAccount
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -614,7 +615,7 @@ fun AddEditLendBorrowTransactionSheet(
                                 )
                                 if (selectedAccount != null) {
                                     Text(
-                                        text = if (selectedAccount?.accountLast4 == "wallet") "${selectedAccount?.accountLast4}" else "••${selectedAccount?.accountLast4}",
+                                        text = if (selectedAccount?.accountLast4 == CashAccount.WALLET_LAST4) "${selectedAccount?.accountLast4}" else "••${selectedAccount?.accountLast4}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

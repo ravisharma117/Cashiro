@@ -176,17 +176,7 @@ class DataPrivacyViewModel @Inject constructor(
             userPreferencesRepository.updateBaseCurrency(account.currency)
 
             // Keep the built-in Cash wallet in sync with the main account's currency
-            val cashWallet = accountBalanceRepository.getLatestBalance("Cash", "wallet")
-            if (cashWallet != null && cashWallet.currency != account.currency) {
-                accountBalanceRepository.insertBalance(
-                    cashWallet.copy(
-                        id = 0,
-                        currency = account.currency,
-                        timestamp = LocalDateTime.now(),
-                        sourceType = "MAIN_ACCOUNT_SYNC"
-                    )
-                )
-            }
+            accountBalanceRepository.syncCashCurrency(account.currency)
             _uiState.update {
                 it.copy(showMainAccountSelection = false, mainAccountSelectionAccounts = emptyList())
             }
