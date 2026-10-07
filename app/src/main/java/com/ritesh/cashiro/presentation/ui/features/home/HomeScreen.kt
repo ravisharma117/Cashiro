@@ -1115,7 +1115,7 @@ private fun UpcomingSubscriptionsCard(
                 ) {
                     Text(
                         text =
-                            CurrencyFormatter.formatCurrency(
+                            CurrencyFormatter.formatTotal(
                                 totalAmount,
                                 currency
                             ).uppercase(),
@@ -1211,8 +1211,8 @@ private fun NetworthSummaryCards(
             userName = uiState.userName,
             balanceHistory = uiState.balanceHistory,
             dateRangeLabel = dateRangeLabel,
-            thisMonthValue = CurrencyFormatter.formatCurrency(uiState.currentMonthTotal, uiState.selectedCurrency),
-            thisYearValue = CurrencyFormatter.formatCurrency(uiState.currentYearTotal, uiState.selectedCurrency),
+            thisMonthValue = CurrencyFormatter.formatTotal(uiState.currentMonthTotal, uiState.selectedCurrency),
+            thisYearValue = CurrencyFormatter.formatTotal(uiState.currentYearTotal, uiState.selectedCurrency),
             availableCurrenciesCount = uiState.availableCurrencies.size,
             onCurrencyClick = { showCurrencySheet = true },
             blurEffects = blurEffects,

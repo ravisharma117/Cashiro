@@ -1079,7 +1079,7 @@ private fun CreditCardItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = CurrencyFormatter.formatCurrency(
+                    text = CurrencyFormatter.formatTotal(
                         available,
                         card.currency
                     ),
@@ -1104,7 +1104,7 @@ private fun CreditCardItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = CurrencyFormatter.formatCurrency(
+                        text = CurrencyFormatter.formatTotal(
                             card.creditLimit ?: BigDecimal.ZERO,
                             card.currency
                         ),
@@ -1395,7 +1395,7 @@ private fun OrphanedCardItem(
             // Show last known balance if available
             if (card.lastBalance != null) {
                 Text(
-                    text = stringResource(R.string.last_balance, CurrencyFormatter.formatCurrency(card.lastBalance, card.currency)),
+                    text = stringResource(R.string.last_balance, CurrencyFormatter.formatTotal(card.lastBalance, card.currency)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp)
@@ -1514,7 +1514,7 @@ private fun LinkCardDialog(
                                         fontWeight = FontWeight.Medium
                                     )
                                     Text(
-                                        text = CurrencyFormatter.formatCurrency(
+                                        text = CurrencyFormatter.formatTotal(
                                             account.balance,
                                             account.currency
                                         ),

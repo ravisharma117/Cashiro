@@ -22,7 +22,7 @@ fun TransactionEntity.formatAmount(): String =
  * Formats the account balance with its currency
  */
 fun AccountBalanceEntity.formatBalance(): String =
-    CurrencyFormatter.formatCurrency(balance, currency)
+    CurrencyFormatter.formatTotal(balance, currency)
 
 /**
  * Formats the subscription amount with its currency

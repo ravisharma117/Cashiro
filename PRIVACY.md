@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated: August 2025**
+**Last Updated: October 2026**
 
 ## Our Commitment to Privacy
 
@@ -10,11 +10,23 @@ Cashiro is built with privacy as the core principle. We believe your financial d
 
 **All data processing happens locally on your device.** We use MediaPipe's on-device LLM (Qwen 2.5) for AI features, ensuring:
 
-- ✅ **No cloud servers** - Your data never leaves your phone
+- ✅ **No cloud servers** - Your financial data never leaves your phone (the one optional exception is the PIN recovery email, described below)
 - ✅ **No data collection** - We don't collect, store, or transmit any user data
 - ✅ **No tracking** - No analytics, no telemetry, no user tracking
 - ✅ **No ads** - No advertising networks or tracking pixels
 - ✅ **Offline AI** - Once downloaded, AI works completely offline
+
+## Optional: PIN Recovery Email
+
+Paisa IQ can lock the app with a 4-digit PIN. The PIN is stored only on your phone, as a salted hash in encrypted storage. It is never sent anywhere.
+
+If you choose to add a **recovery email**, so that a forgotten PIN can be reset, this is the one feature that contacts a server. It is off unless you set it up, and it does nothing while you are offline.
+
+- **What is sent:** the recovery email address (so the code can be mailed to it), the 6-digit code you type back, and a random install id made on your phone. Nothing about your transactions, accounts or PIN is sent.
+- **Where it goes:** the NAX IT Solutions API (`naxits-api.netlify.app`), which sends the email through its mail provider.
+- **What the server keeps:** it does not store your email address. To limit abuse it keeps only scrambled (keyed hash) forms of the address, the code and your network address for 24 hours, then deletes them automatically.
+- **Where the address lives:** on your phone, in encrypted storage, so the app can offer to send the code to it. You can remove it at any time in Security.
+- **No recovery email:** if you do not add one, nothing is ever sent, and a forgotten PIN can only be fixed by clearing the app data, which deletes everything that is not backed up.
 
 ## Data Storage
 

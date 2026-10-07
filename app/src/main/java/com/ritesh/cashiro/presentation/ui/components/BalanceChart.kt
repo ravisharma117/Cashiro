@@ -89,7 +89,7 @@ fun BalanceChart(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = CurrencyFormatter.formatCurrency(paddedMax, primaryCurrency),
+                    text = CurrencyFormatter.formatTotal(paddedMax, primaryCurrency),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -253,7 +253,7 @@ fun BalanceChart(
             
             // Min balance label
             Text(
-                text = CurrencyFormatter.formatCurrency(paddedMin, primaryCurrency),
+                text = CurrencyFormatter.formatTotal(paddedMin, primaryCurrency),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

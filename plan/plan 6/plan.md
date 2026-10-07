@@ -1,5 +1,19 @@
 # Plan 6 — Privacy mode
 
+## Added requirement (2026-10-07): reveal with the proximity sensor
+
+Privacy mode gets a second, optional setting: **Reveal with proximity sensor**. With privacy mode and this setting both on, amounts stay hidden until the user covers the phone's proximity sensor with a finger; they show while it is covered and hide again when the finger is removed.
+
+Design:
+
+- Setting `PRIVACY_REVEAL_ON_PROXIMITY` (default off), shown under the privacy toggle only when the phone has a proximity sensor.
+- A small class `ProximityReveal` wraps `SensorManager` and `Sensor.TYPE_PROXIMITY` and exposes `isNear: Flow<Boolean>`. "Near" is a reading below the sensor's maximum range (many phones report only two values, near and far).
+- It registers only while the app is in the foreground and both settings are on, and unregisters otherwise, to avoid battery use. No permission is needed.
+- `PrivacyState` gains `revealed`, so `maskedAmount` shows real amounts when privacy mode is on but `revealed` is true. The reveal never changes the stored setting.
+- Hidden on lock: when the app locks (Plan 5) the reveal resets.
+- Edge cases to test: phones without the sensor (control is hidden), the sensor being covered by a case or screen protector, a phone call (the system turns the screen off anyway), and leaving the app while covered.
+- Limit to state in the setting's description: the sensor sits near the top of the phone, so the user has to find it; and anyone looking over the shoulder sees amounts while it is covered.
+
 ## Goal
 
 One toggle that hides sensitive amounts across the app, so `₹85,450` shows as `₹••••••`.
@@ -61,3 +75,16 @@ Plan 5 (the Security settings screen that hosts the toggle).
 ## Open decisions
 
 - Whether privacy mode should turn on automatically each time the app locks. Recommended: no; keep it an explicit choice.
+
+## Outcome (2026-10-07)
+
+Built as a first slice, on the `feature/app-lock` branch together with Plan 5.
+
+- Setting: Settings, Security, "Amounts": "Hide total amounts" and, when the phone has a proximity sensor, "Show while the proximity sensor is covered".
+- Masking goes through `CurrencyFormatter.formatTotal`, backed by Compose state in `PrivacyGate`, so screens redraw by themselves. A hidden total shows the currency symbol and a fixed-length mask.
+- Masked: Home balance and totals, account balances, loan and person balances, transaction totals card, analytics totals, profile totals, budget amounts.
+- Not masked yet: individual transaction rows, notifications. Exports and backups keep real amounts.
+- The proximity listener runs only while the app is in the foreground and both switches are on.
+- Both switches are saved in backups.
+- 12 unit tests in `PrivacyGateTest`. Not yet checked on a phone.
+- Still open from this plan: a quick eye toggle on Home, masking transaction rows.

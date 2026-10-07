@@ -1,5 +1,43 @@
 # Plan 5 — App Lock PIN & Security settings
 
+## Outcome (2026-10-07)
+
+Built in the app: 4-digit PIN (salted PBKDF2 hash in encrypted storage), increasing wait after wrong tries that survives restarts, fingerprint shortcut, PIN pad lock screen, Settings > Security screen (lock on/off, phone lock or app PIN, change and remove PIN, lock timeout, recovery email, hide in recent apps), email recovery through `naxits-api`.
+
+Differences from the steps below:
+
+- The old Data Privacy screen held only the app lock section, so the `DataPrivacy` route now opens the new Security screen and the old screen was deleted. The Settings row is relabelled Security. Plan 7 will give Security its own More entry.
+- Lock method and fingerprint-shortcut preferences are in DataStore. The PIN hash, wait counters and recovery email are in an encrypted preferences file, and are not part of backups.
+- Not done: the lock method and fingerprint-shortcut preferences are not exported in backups (the PIN itself never will be).
+- Not tested on a device: PIN entry, the fingerprint prompt, FLAG_SECURE and the recovery flow end to end (needs the API deployed). Unit tests cover hashing, throttling, PIN storage, the recovery client and the email-code session (44 new tests in the app, 19 in `naxits-api`).
+
+## Decisions (2026-10-07)
+
+- **PIN:** exactly 4 digits.
+- **Wrong PINs:** increasing wait (30 s after 5 failures, doubling), persisted across restarts. No data wipe.
+- **Forgotten PIN:** recovery by email. The phone's own lock is not used for recovery.
+- **Recent apps:** optional Security switch, off by default, sets `FLAG_SECURE`.
+
+### Email recovery
+
+The app has no server, and an app cannot verify an email address by itself, so this adds two endpoints to the NAX IT Solutions API (`naxits-api`, branch `feature/paisaiq-recovery`, not yet deployed):
+
+- `POST /api/paisaiq/recovery/send` mails a six-digit code to an address.
+- `POST /api/paisaiq/recovery/verify` checks the code.
+
+Flow:
+
+1. **Setup.** When the PIN is set, the user may add a recovery email. The app asks `send` with purpose `setup`, the user types the code, `verify` confirms, and the address is stored on the phone in encrypted storage. This proves the person owns the mailbox. Skipping is allowed but the screen says plainly that a forgotten PIN then cannot be recovered except by clearing app data.
+2. **Recovery.** "Forgot PIN?" on the lock screen shows the masked address, asks for consent to send, calls `send` with purpose `recover` to the stored address only (the user cannot type a different one), takes the code, and on a verified reply lets the user set a new PIN and clears the wait.
+
+Security properties and limits (details in `naxits-api` README): codes last 10 minutes, five wrong guesses kill a code, one code per address per minute and three per 15 minutes, durable counters in MongoDB, nothing identifying stored (keyed hashes only), rows deleted after 24 hours. The code is also bound to a random install id made on first use.
+
+Honest limits: the check is trusted over HTTPS. Someone who controls a rooted phone and patches the app could skip the check, the same as they could remove any local lock; this protects against a thief using an ordinary phone, not a determined attacker with the device.
+
+Privacy: this is the first network use of the PIN feature. The Security screen asks consent before the first send, `PRIVACY.md` states what the server sees (the address while mailing, hashes for 24 hours), and the feature does nothing offline.
+
+Needs before it works end to end: deploy `naxits-api` (no new environment variable is required: the code mail is sent as `CONTACT_NAXITS_TO` through the contact form's mail settings, and the hashing key is stretched with scrypt from `MANAGE_PASSWORD` (6 or more characters), or set with the optional `RECOVERY_CODE_SECRET`, which is stronger because stretching adds length, not strength). The `CONTACT_NAXITS_TO` address must be one the mail provider is allowed to send as; with Resend that means a verified domain, otherwise it only delivers to the account owner's own address.
+
 ## Goal
 
 Add an app-owned PIN alongside the existing biometric lock, and gather lock settings under Settings → Security.

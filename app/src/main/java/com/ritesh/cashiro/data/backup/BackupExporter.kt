@@ -320,6 +320,12 @@ class BackupExporter @Inject constructor(
                 } else null,
                 accountOrder = if (config.includeAppPreferences) {
                     userPreferencesRepository.accountOrder.first()
+                } else null,
+                privacy = if (config.includeAppPreferences) {
+                    PrivacyPreferences(
+                        hideTotals = userPreferencesRepository.hideTotalAmounts.first(),
+                        revealOnProximity = userPreferencesRepository.revealOnProximity.first()
+                    )
                 } else null
             )
         )

@@ -52,6 +52,14 @@ class BiometricAuthManager @Inject constructor(
     }
 
     /**
+     * Whether a fingerprint or face (not the phone's screen lock) can be used, as the
+     * shortcut that stands in for the app PIN.
+     */
+    fun canUseBiometricOnly(): Boolean =
+        BiometricManager.from(context).canAuthenticate(BIOMETRIC_STRONG) ==
+            BiometricManager.BIOMETRIC_SUCCESS
+
+    /**
      * Check if biometric authentication is available and ready to use
      */
     fun isBiometricAvailable(): Boolean {
@@ -74,18 +82,28 @@ class BiometricAuthManager @Inject constructor(
         title: String = "Unlock Paisa IQ",
         subtitle: String = "Authenticate to access your expense data",
         description: String = "Use your biometric credential or device PIN",
+        biometricOnly: Boolean = false,
+        negativeButtonText: String = "Use PIN",
         onSuccess: () -> Unit,
         onError: (String) -> Unit,
         onFailed: () -> Unit = {}
     ) {
         val executor = ContextCompat.getMainExecutor(context)
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        val promptBuilder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(title)
             .setSubtitle(subtitle)
             .setDescription(description)
-            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
-            .build()
+
+        if (biometricOnly) {
+            // The app PIN is the fallback, so the phone's own lock is not offered here.
+            promptBuilder
+                .setAllowedAuthenticators(BIOMETRIC_STRONG)
+                .setNegativeButtonText(negativeButtonText)
+        } else {
+            promptBuilder.setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+        }
+        val promptInfo = promptBuilder.build()
 
         val biometricPrompt = BiometricPrompt(activity, executor,
             object : BiometricPrompt.AuthenticationCallback() {

@@ -96,9 +96,9 @@ fun TransactionTotalsCard(
                         contentAlignment = Alignment.Center
                     ) {
                         val formattedIncome = if (isEstimated) {
-                            stringResource(R.string.estimated_amount_format, CurrencyFormatter.formatCurrency(income, currency))
+                            stringResource(R.string.estimated_amount_format, CurrencyFormatter.formatTotal(income, currency))
                         } else {
-                            CurrencyFormatter.formatCurrency(income, currency)
+                            CurrencyFormatter.formatTotal(income, currency)
                         }
                         TotalColumn(
                             icon = {
@@ -143,9 +143,9 @@ fun TransactionTotalsCard(
                         contentAlignment = Alignment.Center
                     ) {
                         val formattedExpenses = if (isEstimated) {
-                            stringResource(R.string.estimated_amount_format, CurrencyFormatter.formatCurrency(expenses, currency))
+                            stringResource(R.string.estimated_amount_format, CurrencyFormatter.formatTotal(expenses, currency))
                         } else {
-                            CurrencyFormatter.formatCurrency(expenses, currency)
+                            CurrencyFormatter.formatTotal(expenses, currency)
                         }
                         TotalColumn(
                             icon = {
@@ -199,9 +199,9 @@ fun TransactionTotalsCard(
                         contentAlignment = Alignment.Center
                     ) {
                         val formattedNet = if (isEstimated) {
-                            stringResource(R.string.estimated_amount_format, "$netPrefix${CurrencyFormatter.formatCurrency(netBalance, currency)}")
+                            stringResource(R.string.estimated_amount_format, "$netPrefix${CurrencyFormatter.formatTotal(netBalance, currency)}")
                         } else {
-                            "$netPrefix${CurrencyFormatter.formatCurrency(netBalance, currency)}"
+                            "$netPrefix${CurrencyFormatter.formatTotal(netBalance, currency)}"
                         }
                         TotalColumn(
                             icon = {

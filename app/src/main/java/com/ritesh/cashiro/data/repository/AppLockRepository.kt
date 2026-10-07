@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.data.repository
 
+import com.ritesh.cashiro.domain.security.AppLockMethod
 import com.ritesh.cashiro.data.preferences.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -24,6 +25,29 @@ class AppLockRepository @Inject constructor(
      * Flow indicating timeout duration in minutes
      */
     val timeoutMinutes: Flow<Int> = userPreferencesRepository.appLockTimeoutMinutes
+
+    /**
+     * How the lock screen proves ownership
+     */
+    val lockMethod: Flow<AppLockMethod> = userPreferencesRepository.appLockMethod
+
+    /**
+     * Whether a fingerprint or face can stand in for the app PIN
+     */
+    val biometricEnabled: Flow<Boolean> = userPreferencesRepository.appLockBiometricEnabled
+
+    /**
+     * Whether the app hides itself in recent apps and blocks screenshots
+     */
+    val secureWindowEnabled: Flow<Boolean> = userPreferencesRepository.secureWindowEnabled
+
+    suspend fun setLockMethod(method: AppLockMethod) = userPreferencesRepository.setAppLockMethod(method)
+
+    suspend fun setBiometricEnabled(enabled: Boolean) =
+        userPreferencesRepository.setAppLockBiometricEnabled(enabled)
+
+    suspend fun setSecureWindowEnabled(enabled: Boolean) =
+        userPreferencesRepository.setSecureWindowEnabled(enabled)
 
     /**
      * Enable or disable app lock
