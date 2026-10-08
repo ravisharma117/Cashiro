@@ -192,6 +192,8 @@ data class Transactions(
 /** Add, edit, reorder and delete categories (the spend overview is [Categories]). */
 @Serializable object ManageCategories
 
+@Serializable object RecurringTransactions
+
 @Serializable data class CategoryDetail(val categoryName: String, val year: Int, val month: Int)
 
 @Serializable object Analytics

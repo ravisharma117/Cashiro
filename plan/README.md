@@ -20,7 +20,7 @@ In every plan, `$APP` means `app/src/main/java/com/ritesh/cashiro`.
 | 8 | [Category transactions + analysis](plan%208/plan.md) | 10 | 7 | `feature/category-analysis` | ◐ built, device check open |
 | 9 | [Home widgets completion](plan%209/plan.md) | 9 | 4, 7 | `feature/home-customization` | skipped (not selected) |
 | 10 | [Unified transaction engine](plan%2010/plan.md) | 13, 14, 23 | 3 | `feature/transaction-engine` | skipped (not selected) |
-| 11 | [Recurring transactions](plan%2011/plan.md) | 11 | 10 | `feature/recurring-transactions` | ☐ |
+| 11 | [Recurring transactions](plan%2011/plan.md) | 11 | 10 | `feature/recurring-transactions` | ◐ built, device check open |
 | 12 | [Bills & subscriptions](plan%2012/plan.md) | 18 | 11 | `feature/bills` | ☐ |
 | 13 | [CSV import wizard](plan%2013/plan.md) | 12 | 10 | `feature/csv-import` | skipped (not selected) |
 | 14 | [UPI accessibility capture](plan%2014/plan.md) | 13 | 10 | `feature/upi-accessibility` | skipped (not selected) |

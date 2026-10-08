@@ -92,6 +92,7 @@ import com.ritesh.cashiro.presentation.ui.features.lendborrow.LendBorrowScreen
 import com.ritesh.cashiro.presentation.ui.features.lendborrow.PersonDetailScreen
 import com.ritesh.cashiro.presentation.ui.features.onboarding.OnBoardingScreen
 import com.ritesh.cashiro.presentation.ui.features.profile.ProfileScreen
+import com.ritesh.cashiro.presentation.ui.features.recurring.RecurringTransactionsScreen
 import com.ritesh.cashiro.presentation.ui.features.settings.SettingsScreen
 import com.ritesh.cashiro.presentation.ui.features.settings.about.AboutScreen
 import com.ritesh.cashiro.presentation.ui.features.settings.about.LicensesScreen
@@ -324,6 +325,7 @@ fun CashiroNavHost(
                         onNavigateToWebhooks = { navController.safeNavigate(Webhooks) },
                         onNavigateToBudgets = { navController.safeNavigate(Budgets()) },
                         onNavigateToLendBorrow = { navController.safeNavigate(LendBorrow()) },
+                        onNavigateToRecurring = { navController.safeNavigate(RecurringTransactions) },
                         onNavigateToDataPrivacy = { navController.safeNavigate(DataPrivacy) },
                         onNavigateToCloudBackup = { navController.safeNavigate(CloudBackup) },
                         onNavigateToAbout = { navController.safeNavigate(About) },
@@ -516,6 +518,17 @@ fun CashiroNavHost(
                         onOpenCategory = { name, month ->
                             navController.safeNavigate(CategoryDetail(name, month.year, month.monthValue))
                         }
+                    )
+                }
+
+                composable<RecurringTransactions>(
+                    enterTransition = CashiroTransitions.horizontalSlideEnter,
+                    exitTransition = CashiroTransitions.horizontalSlideExit,
+                    popEnterTransition = CashiroTransitions.horizontalSlidePopEnter,
+                    popExitTransition = CashiroTransitions.horizontalSlidePopExit
+                ) {
+                    RecurringTransactionsScreen(
+                        onNavigateBack = { navController.safePopBackStack() }
                     )
                 }
 
