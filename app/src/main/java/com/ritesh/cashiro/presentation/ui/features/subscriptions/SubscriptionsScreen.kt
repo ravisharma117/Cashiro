@@ -241,6 +241,16 @@ fun SubscriptionsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
+            item {
+                CashiroCard(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = stringResource(R.string.subscriptions_explainer),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
             // Total Monthly & Yearly Subscriptions Summary
             item {
                 TotalSubscriptionsSummary(

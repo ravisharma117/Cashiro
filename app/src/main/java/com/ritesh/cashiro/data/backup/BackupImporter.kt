@@ -184,6 +184,8 @@ class BackupImporter @Inject constructor(
                 database.merchantMappingDao().deleteAllMappings()
                 database.unrecognizedSmsDao().deleteAll()
                 database.chatDao().deleteAllMessages()
+                database.recurringTransactionDao().deleteAllOccurrences()
+                database.recurringTransactionDao().deleteAll()
                 database.budgetDao().deleteAllBudgets()
                 database.subcategoryDao().getAllSubcategories().first().forEach { 
                     database.subcategoryDao().deleteSubcategory(it)
@@ -264,6 +266,12 @@ class BackupImporter @Inject constructor(
 
                 backup.database.lendBorrowTransactions.forEach { tx ->
                     database.lendBorrowDao().insertTransaction(tx)
+                }
+
+                // Schedules keep their ids, so their history lines up as saved
+                database.recurringTransactionDao().let { dao ->
+                    backup.database.recurringTransactions.forEach { dao.insert(it) }
+                    dao.insertOccurrences(backup.database.recurringOccurrences)
                 }
                 
                 // Import preferences
@@ -410,6 +418,12 @@ class BackupImporter @Inject constructor(
                     } ?: tx
                     database.lendBorrowDao().insertTransaction(remappedTx)
                 }
+
+                importRecurringWithMerge(
+                    backup.database.recurringTransactions,
+                    backup.database.recurringOccurrences,
+                    transactionIdMap
+                )
                 
                 // Import preferences (merge with existing)
                 importPreferences(backup.preferences)
@@ -620,6 +634,45 @@ class BackupImporter @Inject constructor(
     /**
      * Import budgets with merge and ID remapping
      */
+    /**
+     * Adds the backup's recurring schedules next to the existing ones. A schedule that already
+     * exists (same title, amount, account, repeat rule and start) is not added twice, and its
+     * history rows are attached to the existing one. New schedules get fresh ids, so their
+     * history is re-pointed, and created transactions follow the transaction id remap.
+     */
+    private suspend fun importRecurringWithMerge(
+        schedules: List<com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity>,
+        occurrences: List<com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity>,
+        transactionIdMap: Map<Long, Long>
+    ) {
+        if (schedules.isEmpty()) return
+        val dao = database.recurringTransactionDao()
+        val existing = dao.getAll()
+        val idMap = mutableMapOf<Long, Long>()
+
+        schedules.forEach { incoming ->
+            val match = existing.firstOrNull {
+                it.title == incoming.title &&
+                    it.amount.compareTo(incoming.amount) == 0 &&
+                    it.accountLast4 == incoming.accountLast4 &&
+                    it.frequency == incoming.frequency &&
+                    it.intervalCount == incoming.intervalCount &&
+                    it.customUnit == incoming.customUnit &&
+                    it.startDate == incoming.startDate
+            }
+            idMap[incoming.id] = match?.id ?: dao.insert(incoming.copy(id = 0))
+        }
+
+        occurrences.forEach { occurrence ->
+            val newScheduleId = idMap[occurrence.recurringId] ?: return@forEach
+            val newTransactionId = occurrence.transactionId?.let { transactionIdMap[it] ?: it }
+            // The unique (schedule, date) index drops anything already recorded
+            dao.insertOccurrence(
+                occurrence.copy(id = 0, recurringId = newScheduleId, transactionId = newTransactionId)
+            )
+        }
+    }
+
     private suspend fun importBudgetsWithMerge(
         budgets: List<BudgetEntity>,
         limits: List<BudgetCategoryLimitEntity>

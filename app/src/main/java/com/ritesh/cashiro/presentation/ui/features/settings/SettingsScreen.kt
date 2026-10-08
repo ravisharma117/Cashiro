@@ -86,6 +86,7 @@ import com.ritesh.cashiro.presentation.ui.icons.Clock
 import com.ritesh.cashiro.presentation.ui.icons.DollarCircle
 import com.ritesh.cashiro.presentation.ui.icons.Fireworks7
 import com.ritesh.cashiro.presentation.ui.icons.Iconax
+import com.ritesh.cashiro.presentation.ui.icons.RefreshCircle
 import com.ritesh.cashiro.presentation.ui.icons.ImportArrow01
 import com.ritesh.cashiro.presentation.ui.icons.NotificationBing
 import com.ritesh.cashiro.presentation.ui.icons.SecuritySafe
@@ -123,6 +124,7 @@ fun SettingsScreen(
     onNavigateToNotifications: () -> Unit = {},
     onNavigateToWebhooks: () -> Unit = {},
     onNavigateToBudgets: () -> Unit = {},
+    onNavigateToRecurring: () -> Unit = {},
     onNavigateToLendBorrow: () -> Unit = {},
     onNavigateToDataPrivacy: () -> Unit = {},
     onNavigateToCloudBackup: () -> Unit = {},
@@ -598,6 +600,51 @@ fun SettingsScreen(
                             )
                         },
                         onClick = { onNavigateToLendBorrow() },
+                        shape = ListItemPosition.Middle.toShape(),
+                        padding = PaddingValues(0.dp)
+                    )
+
+                    // Recurring transactions
+                    ListItem(
+                        headline = {
+                            Text(
+                                text = stringResource(R.string.recurring_title),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium
+                            )
+                        },
+                        supporting = {
+                            Text(
+                                text = stringResource(R.string.recurring_subtitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        leading = {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(
+                                        color = cyan_light,
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Iconax.RefreshCircle,
+                                    contentDescription = null,
+                                    tint = cyan_dark
+                                )
+                            }
+                        },
+                        trailing = {
+                            Icon(
+                                Icons.Rounded.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        onClick = { onNavigateToRecurring() },
                         shape = ListItemPosition.Middle.toShape(),
                         padding = PaddingValues(0.dp)
                     )

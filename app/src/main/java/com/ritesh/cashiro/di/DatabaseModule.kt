@@ -82,7 +82,8 @@ object DatabaseModule {
                     CashiroDatabase.MIGRATION_58_59,
                     CashiroDatabase.MIGRATION_59_60,
                     CashiroDatabase.MIGRATION_60_61,
-                    CashiroDatabase.MIGRATION_61_62
+                    CashiroDatabase.MIGRATION_61_62,
+                    CashiroDatabase.MIGRATION_62_63
                 )
 
                 // Enable auto-migrations
@@ -276,6 +277,12 @@ object DatabaseModule {
     @Singleton
     fun provideLendBorrowDao(database: CashiroDatabase): com.ritesh.cashiro.data.database.dao.LendBorrowDao {
         return database.lendBorrowDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRecurringTransactionDao(database: CashiroDatabase): com.ritesh.cashiro.data.database.dao.RecurringTransactionDao {
+        return database.recurringTransactionDao()
     }
 }
 /** Database callback to seed initial data when database is first created */

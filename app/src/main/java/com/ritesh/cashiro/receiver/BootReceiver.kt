@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.ritesh.cashiro.data.manager.NotificationScheduler
 import com.ritesh.cashiro.data.webhook.WebhookSyncScheduler
+import com.ritesh.cashiro.domain.service.RecurringRunner
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -25,6 +26,7 @@ class BootReceiver : BroadcastReceiver() {
     interface BootReceiverEntryPoint {
         fun notificationScheduler(): NotificationScheduler
         fun webhookSyncScheduler(): WebhookSyncScheduler
+        fun recurringRunner(): RecurringRunner
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -37,6 +39,7 @@ class BootReceiver : BroadcastReceiver() {
         )
         val scheduler = entryPoint.notificationScheduler()
         val webhookSyncScheduler = entryPoint.webhookSyncScheduler()
+        val recurringRunner = entryPoint.recurringRunner()
 
         // BroadcastReceiver onReceive has only ~10s of guaranteed lifetime. Without goAsync()
         // the OS can kill the process before applyScheduling()/scheduleDailyReminder() finish
@@ -61,6 +64,14 @@ class BootReceiver : BroadcastReceiver() {
                     throw e
                 } catch (t: Throwable) {
                     Log.e(TAG, "Failed to re-apply webhook scheduling", t)
+                }
+                try {
+                    // Re-arms the recurring alarm and creates anything that came due while off
+                    recurringRunner.run()
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    Log.e(TAG, "Failed to restore recurring schedules", t)
                 }
             } finally {
                 pendingResult.finish()

@@ -1422,4 +1422,76 @@
         <item quantity="one">%d transaction</item>
         <item quantity="other">%d transactions</item>
     </plurals>
+    <string name="recurring_channel_name">Recurring transactions</string>
+    <string name="recurring_notif_added_title">%1$s added</string>
+    <string name="recurring_notif_added_text">%1$s was added to your transactions.</string>
+    <string name="recurring_notif_due_title">%1$s is due</string>
+    <string name="recurring_notif_due_text">%1$s is due today. Add it now?</string>
+    <string name="recurring_notif_reminder_title">%1$s is due soon</string>
+    <string name="recurring_notif_reminder_text">%1$s on %2$s</string>
+    <string name="recurring_action_add">Add now</string>
+    <string name="recurring_action_skip">Skip</string>
+    <string name="recurring_title">Recurring transactions</string>
+    <string name="recurring_explainer">Recurring transactions are added to your transactions for you on the dates you set. Subscriptions (on the Home screen) only track a charge and its next date, and add nothing by themselves.</string>
+    <string name="subscriptions_explainer">Subscriptions only track a charge and its next date. They do not add transactions. To have a transaction added for you on schedule, use Recurring transactions in Settings.</string>
+    <string name="recurring_subtitle">Adds the transaction for you on the dates you set</string>
+    <string name="recurring_add">Add recurring</string>
+    <string name="recurring_new_title">New recurring</string>
+    <string name="recurring_edit_title">Edit recurring</string>
+    <string name="recurring_empty">Nothing repeats yet. Add rent, a bill or a salary and it will be created for you on time.</string>
+    <string name="recurring_section_active">Active</string>
+    <string name="recurring_section_paused">Paused</string>
+    <string name="recurring_section_ended">Ended</string>
+    <string name="recurring_next">Next: %1$s</string>
+    <string name="recurring_paused_label">Paused</string>
+    <string name="recurring_ended_label">Ended</string>
+    <string name="recurring_summary">%1$s · %2$s</string>
+    <string name="recurring_field_name">Name</string>
+    <string name="recurring_field_amount">Amount</string>
+    <string name="recurring_field_category">Category</string>
+    <string name="recurring_field_account">Account</string>
+    <string name="recurring_field_notes">Notes (optional)</string>
+    <string name="recurring_account_none">No account</string>
+    <string name="recurring_field_start">Starts</string>
+    <string name="recurring_field_end">Ends</string>
+    <string name="recurring_end_never">Never</string>
+    <string name="recurring_repeat_label">Repeats</string>
+    <string name="recurring_freq_daily">Daily</string>
+    <string name="recurring_freq_weekly">Weekly</string>
+    <string name="recurring_freq_monthly">Monthly</string>
+    <string name="recurring_freq_yearly">Yearly</string>
+    <string name="recurring_freq_custom">Custom</string>
+    <string name="recurring_custom_every">Every</string>
+    <string name="recurring_unit_day">Days</string>
+    <string name="recurring_unit_week">Weeks</string>
+    <string name="recurring_unit_month">Months</string>
+    <string name="recurring_unit_year">Years</string>
+    <plurals name="recurring_every_days"><item quantity="one">Every day</item><item quantity="other">Every %d days</item></plurals>
+    <plurals name="recurring_every_weeks"><item quantity="one">Every week</item><item quantity="other">Every %d weeks</item></plurals>
+    <plurals name="recurring_every_months"><item quantity="one">Every month</item><item quantity="other">Every %d months</item></plurals>
+    <plurals name="recurring_every_years"><item quantity="one">Every year</item><item quantity="other">Every %d years</item></plurals>
+    <string name="recurring_auto_create">Add it automatically</string>
+    <string name="recurring_auto_create_sub">Off: you get a notification and add it yourself</string>
+    <string name="recurring_reminder_label">Remind me</string>
+    <string name="recurring_reminder_none">No reminder</string>
+    <plurals name="recurring_reminder_days"><item quantity="one">%d day before</item><item quantity="other">%d days before</item></plurals>
+    <string name="recurring_save">Save</string>
+    <string name="recurring_cancel">Cancel</string>
+    <string name="recurring_menu_skip_next">Skip next</string>
+    <string name="recurring_menu_pause">Pause</string>
+    <string name="recurring_menu_resume">Resume</string>
+    <string name="recurring_menu_history">History</string>
+    <string name="recurring_menu_delete">Delete</string>
+    <string name="recurring_menu_edit">Edit</string>
+    <string name="recurring_delete_title">Delete %1$s?</string>
+    <string name="recurring_delete_text">The schedule and its history are removed. Transactions it already created stay.</string>
+    <string name="recurring_history_title">History</string>
+    <string name="recurring_history_empty">Nothing has happened yet.</string>
+    <string name="recurring_status_created">Added</string>
+    <string name="recurring_status_skipped">Skipped</string>
+    <string name="recurring_status_pending">Waiting for you</string>
+    <string name="recurring_error_name">Enter a name</string>
+    <string name="recurring_error_amount">Enter an amount above zero</string>
+    <string name="recurring_error_category">Choose a category</string>
+    <string name="recurring_error_dates">The end date must not be before the start date</string>
 </resources>

@@ -202,6 +202,14 @@
             android:name=".receiver.WebhookSyncAlarmReceiver"
             android:exported="false" />
 
+        <!-- Recurring transactions: exact alarm for due dates and reminders, and the notification buttons -->
+        <receiver
+            android:name=".receiver.RecurringAlarmReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".receiver.RecurringActionReceiver"
+            android:exported="false" />
+
         <!-- Quick Settings Tiles -->
         <service
             android:name=".service.AddTransactionTileService"

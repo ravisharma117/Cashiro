@@ -1,6 +1,7 @@
 package com.ritesh.cashiro
 
 import com.ritesh.cashiro.data.security.PrivacyController
+import com.ritesh.cashiro.domain.service.RecurringRunner
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -62,6 +63,9 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var privacyController: PrivacyController
 
+    @Inject
+    lateinit var recurringRunner: RecurringRunner
+
     // Transaction ID to edit when launched from notification
     var editTransactionId by mutableStateOf<Long?>(null)
         private set
@@ -96,6 +100,11 @@ class MainActivity : AppCompatActivity() {
         // Schedule daily reminders
         lifecycleScope.launch {
             notificationScheduler.scheduleDailyReminder()
+        }
+
+        // Create any recurring transactions that came due while the app was closed, and re-arm the alarm
+        lifecycleScope.launch {
+            runCatching { recurringRunner.run() }
         }
 
         // Keep hidden totals and the proximity-sensor reveal in step with the settings

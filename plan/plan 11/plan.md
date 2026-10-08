@@ -70,3 +70,15 @@ Plan 10 (generated transactions go through the engine with source `RECURRING`).
 
 - Catch-up limit after a long gap (recommended: create up to 12 missed occurrences, then ask).
 - Exact-time alarms versus a daily worker. Recommended: daily worker; day-level accuracy is enough and avoids the exact-alarm permission.
+
+## Outcome (2026-10-08)
+
+Built without Plans 7, 9 and 10, so these parts of the plan changed:
+
+- Transactions are created through the existing `AddTransactionUseCase` (there is no engine), with `is_recurring = true` and no subscription created.
+- The list is opened from a Settings row (there is no More screen). No Home widget.
+- Decisions: only the latest missed date creates a transaction after a gap (earlier ones are recorded as skipped); an exact alarm at 08:00 on the due date, falling back to an inexact alarm if the permission is refused.
+- Database version 63: `recurring_transactions` and `recurring_occurrences` (unique on schedule and date). Migration SQL copied from the exported schema. Backups include both tables; a merge import does not duplicate an identical schedule.
+- Parts: `RecurrenceCalculator` and `RecurringProcessor` (plain Kotlin, 25 tests), `RecurringRunner` (used by the alarm, boot and app start), `RecurringAlarmScheduler`, `RecurringNotifier` with Add now and Skip buttons.
+- Not done: "Repeat" on the Add screen, "Make recurring" on transaction detail, transfers between accounts, and the choice to delete already-created transactions with a schedule (they are always kept).
+- Not yet checked on a phone: a schedule firing at 08:00, the reminder and the Add now / Skip buttons, behaviour after a reboot.

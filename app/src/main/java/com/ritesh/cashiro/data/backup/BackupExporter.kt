@@ -221,6 +221,21 @@ class BackupExporter @Inject constructor(
         val lendBorrowPersons = if (config.includeTransactionalData) database.lendBorrowDao().getAllPersons().first() else emptyList()
         val lendBorrowTransactions = if (config.includeTransactionalData) database.lendBorrowDao().getAllTransactions().first() else emptyList()
 
+        val recurringDao = database.recurringTransactionDao()
+        val recurringTransactions = if (config.includeTransactionalData) {
+            recurringDao.getAll().map { schedule ->
+                when (config.privacy) {
+                    ExportPrivacy.FULL -> schedule
+                    ExportPrivacy.MASKED -> schedule.copy(
+                        notes = null,
+                        accountLast4 = schedule.accountLast4?.takeLast(4)?.let { "****$it" }
+                    )
+                    ExportPrivacy.ANONYMOUS -> schedule.copy(title = "Merchant", notes = null, accountLast4 = "****")
+                }
+            }
+        } else emptyList()
+        val recurringOccurrences = if (config.includeTransactionalData) recurringDao.getAllOccurrences() else emptyList()
+
         return CashiroBackup(
             metadata = BackupMetadata(
                 exportId = UUID.randomUUID().toString(),
@@ -255,7 +270,9 @@ class BackupExporter @Inject constructor(
                 webhookProfiles = webhookProfiles,
                 exchangeRates = exchangeRates,
                 lendBorrowPersons = lendBorrowPersons,
-                lendBorrowTransactions = lendBorrowTransactions
+                lendBorrowTransactions = lendBorrowTransactions,
+                recurringTransactions = recurringTransactions,
+                recurringOccurrences = recurringOccurrences
             ),
             preferences = PreferencesSnapshot(
                 theme = ThemePreferences(

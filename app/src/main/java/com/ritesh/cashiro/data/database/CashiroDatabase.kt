@@ -83,9 +83,11 @@ import com.ritesh.cashiro.data.database.entity.WebhookProfileEntity
             WebhookCursorEntity::class,
             BankNotificationEntity::class,
             com.ritesh.cashiro.data.database.entity.LendBorrowPersonEntity::class,
-            com.ritesh.cashiro.data.database.entity.LendBorrowTransactionEntity::class
+            com.ritesh.cashiro.data.database.entity.LendBorrowTransactionEntity::class,
+            com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity::class,
+            com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity::class
         ],
-        version = 62,
+        version = 63,
     exportSchema = true,
     autoMigrations =
         [
@@ -133,6 +135,7 @@ abstract class CashiroDatabase : RoomDatabase() {
     abstract fun webhookCursorDao(): WebhookCursorDao
     abstract fun bankNotificationDao(): BankNotificationDao
     abstract fun lendBorrowDao(): com.ritesh.cashiro.data.database.dao.LendBorrowDao
+    abstract fun recurringTransactionDao(): com.ritesh.cashiro.data.database.dao.RecurringTransactionDao
 
     companion object {
         const val DATABASE_NAME = "pennywise_database"
@@ -667,6 +670,18 @@ MIGRATION_55_56,
                         )
                         """.trimIndent()
                     )
+                }
+            }
+
+        val MIGRATION_62_63 =
+            object : Migration(62, 63) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    // Schedules and their per-date history (copied from the exported schema 63)
+                    db.execSQL("CREATE TABLE IF NOT EXISTS `recurring_transactions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `amount` TEXT NOT NULL, `currency` TEXT NOT NULL DEFAULT 'INR', `transaction_type` TEXT NOT NULL, `category` TEXT NOT NULL, `subcategory` TEXT, `bank_name` TEXT, `account_last4` TEXT, `frequency` TEXT NOT NULL, `interval_count` INTEGER NOT NULL DEFAULT 1, `custom_unit` TEXT, `start_date` TEXT NOT NULL, `end_date` TEXT, `next_run_date` TEXT NOT NULL, `last_run_date` TEXT, `auto_create` INTEGER NOT NULL DEFAULT 1, `reminder_days_before` INTEGER NOT NULL DEFAULT 0, `last_reminder_for` TEXT, `state` TEXT NOT NULL, `notes` TEXT, `created_at` TEXT NOT NULL, `updated_at` TEXT NOT NULL)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurring_transactions_next_run_date` ON `recurring_transactions` (`next_run_date`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_recurring_transactions_state` ON `recurring_transactions` (`state`)")
+                    db.execSQL("CREATE TABLE IF NOT EXISTS `recurring_occurrences` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `recurring_id` INTEGER NOT NULL, `due_date` TEXT NOT NULL, `status` TEXT NOT NULL, `transaction_id` INTEGER, `created_at` TEXT NOT NULL, FOREIGN KEY(`recurring_id`) REFERENCES `recurring_transactions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                    db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_recurring_occurrences_recurring_id_due_date` ON `recurring_occurrences` (`recurring_id`, `due_date`)")
                 }
             }
     }

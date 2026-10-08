@@ -144,7 +144,14 @@ data class DatabaseSnapshot(
     val lendBorrowPersons: List<LendBorrowPersonEntity> = emptyList(),
 
     @SerializedName("lend_borrow_transactions")
-    val lendBorrowTransactions: List<LendBorrowTransactionEntity> = emptyList()
+    val lendBorrowTransactions: List<LendBorrowTransactionEntity> = emptyList(),
+
+    // Absent in backups made before recurring transactions existed
+    @SerializedName("recurring_transactions")
+    val recurringTransactions: List<com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity> = emptyList(),
+
+    @SerializedName("recurring_occurrences")
+    val recurringOccurrences: List<com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity> = emptyList()
 )
 
 data class WebhookProfileBackup(
