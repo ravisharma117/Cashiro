@@ -200,7 +200,7 @@ fun SharedTransitionScope.BudgetCard(
                     }
                     
                     Text(
-                        text = CurrencyFormatter.formatTotal(
+                        text = CurrencyFormatter.formatCurrency(
                             dailyBudgetLeft,
                             budget.currency
                         ),
@@ -229,7 +229,7 @@ fun SharedTransitionScope.BudgetCard(
                     
                     Row(verticalAlignment = Alignment.CenterVertically) {
                          Text(
-                            text = CurrencyFormatter.formatTotal(
+                            text = CurrencyFormatter.formatCurrency(
                                 budgetWithSpending.currentSpending,
                                 budget.currency
                             ).replace(".00", ""), // Simplified display
@@ -249,7 +249,7 @@ fun SharedTransitionScope.BudgetCard(
                         )
                         
                         Text(
-                            text = CurrencyFormatter.formatTotal(
+                            text = CurrencyFormatter.formatCurrency(
                                 budget.amount,
                                 budget.currency
                             ).replace(".00", ""), // Simplified display

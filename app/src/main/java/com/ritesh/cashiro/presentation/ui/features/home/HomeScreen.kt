@@ -1115,7 +1115,7 @@ private fun UpcomingSubscriptionsCard(
                 ) {
                     Text(
                         text =
-                            CurrencyFormatter.formatTotal(
+                            CurrencyFormatter.formatCurrency(
                                 totalAmount,
                                 currency
                             ).uppercase(),

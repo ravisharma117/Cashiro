@@ -562,8 +562,8 @@ fun SharedTransitionScope.PersonListItemCard(
     val isGet = person.netBalance > BigDecimal.ZERO
     val isOwe = person.netBalance < BigDecimal.ZERO
     val statusText = when {
-        isGet -> stringResource(R.string.gets_amount, CurrencyFormatter.formatTotal(person.netBalance, currency))
-        isOwe -> stringResource(R.string.owes_amount, CurrencyFormatter.formatTotal(person.netBalance.abs(), currency))
+        isGet -> stringResource(R.string.gets_amount, CurrencyFormatter.formatCurrency(person.netBalance, currency))
+        isOwe -> stringResource(R.string.owes_amount, CurrencyFormatter.formatCurrency(person.netBalance.abs(), currency))
         else -> stringResource(R.string.settled_tag)
     }
 

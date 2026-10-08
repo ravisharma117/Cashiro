@@ -287,7 +287,7 @@ fun SharedTransitionScope.LoanSummaryItem(
             }
 
             Text(
-                text = CurrencyFormatter.formatTotal(amount, currency),
+                text = CurrencyFormatter.formatCurrency(amount, currency),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 22.sp
@@ -423,7 +423,7 @@ private fun LoanStatusPill(text: String, color: Color) {
  * grouping/decimal separator.
  */
 private fun splitCurrencyParts(amount: BigDecimal, currency: String): Pair<String, String> {
-    val full = CurrencyFormatter.formatTotal(amount, currency)
+    val full = CurrencyFormatter.formatCurrency(amount, currency)
     val lastDot = full.lastIndexOf('.')
     val lastComma = full.lastIndexOf(',')
     val decimalIndex = maxOf(lastDot, lastComma)

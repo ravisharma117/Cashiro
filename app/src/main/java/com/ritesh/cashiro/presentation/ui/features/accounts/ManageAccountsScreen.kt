@@ -1079,7 +1079,7 @@ private fun CreditCardItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = CurrencyFormatter.formatTotal(
+                    text = CurrencyFormatter.formatCurrency(
                         available,
                         card.currency
                     ),
@@ -1104,7 +1104,7 @@ private fun CreditCardItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = CurrencyFormatter.formatTotal(
+                        text = CurrencyFormatter.formatCurrency(
                             card.creditLimit ?: BigDecimal.ZERO,
                             card.currency
                         ),

@@ -90,7 +90,7 @@ fun AnalyticsSummaryCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = CurrencyFormatter.formatTotal(totalAmount, currency),
+                        text = CurrencyFormatter.formatCurrency(totalAmount, currency),
                         style = MaterialTheme.typography.displaySmall.copy(
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold
@@ -163,9 +163,9 @@ fun AnalyticsSummaryCard(
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
                                 text = if (transactionCount > 0) {
-                                    CurrencyFormatter.formatTotal(averageAmount, currency)
+                                    CurrencyFormatter.formatCurrency(averageAmount, currency)
                                 } else {
-                                    CurrencyFormatter.formatTotal(BigDecimal.ZERO, currency)
+                                    CurrencyFormatter.formatCurrency(BigDecimal.ZERO, currency)
                                 },
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,

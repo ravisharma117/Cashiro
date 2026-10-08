@@ -82,8 +82,8 @@ Built as a first slice, on the `feature/app-lock` branch together with Plan 5.
 
 - Setting: Settings, Security, "Amounts": "Hide total amounts" and, when the phone has a proximity sensor, "Show while the proximity sensor is covered".
 - Masking goes through `CurrencyFormatter.formatTotal`, backed by Compose state in `PrivacyGate`, so screens redraw by themselves. A hidden total shows the currency symbol and a fixed-length mask.
-- Masked: Home balance and totals, account balances, loan and person balances, transaction totals card, analytics totals, profile totals, budget amounts.
-- Not masked yet: individual transaction rows, notifications. Exports and backups keep real amounts.
+- Masked (narrowed on request): balances (Home balance card and chart axis, account cards and account lists), cash account, net worth, and the income, expense and net totals for this month and this year (Home, Transactions totals card, Profile).
+- Everything else shows normally: budgets, loan and person balances, analytics figures, category screens, credit-card limits, subscriptions, individual transactions. Exports and backups keep real amounts.
 - The proximity listener runs only while the app is in the foreground and both switches are on.
 - Both switches are saved in backups.
 - 12 unit tests in `PrivacyGateTest`. Not yet checked on a phone.
