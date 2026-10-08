@@ -67,3 +67,13 @@ None (queries only).
 ## Open decisions
 
 - Whether income categories get the same detail view (recommended: yes, same screen, "earned" wording).
+
+## Outcome (2026-10-08)
+
+Plan 7 was skipped, so there is no Categories tab. The browsing view replaces the old screen at the same place (Settings, Categories).
+
+- `CategoryAnalysisCalculator` (plain Kotlin, 11 tests) does the arithmetic; `GetCategoryAnalysisUseCase` loads transactions the way the Analysis tab does (same query, expense or income type only, converted to the base currency), so no new DAO queries were needed.
+- Categories now opens `CategoriesOverviewScreen`: month switcher, expense and income sections, spend and share bar per category. The old management screen is `ManageCategories`, reached from the pencil button.
+- `CategoryDetail(categoryName, year, month)`: Transactions tab (with "See all") and Analysis tab (total, daily average, comparison with last month, share, 6-month trend, subcategory split), plus the budget limit when one covers the category.
+- Analysis tab: tapping a category while viewing this or last month opens its detail; other periods still open the filtered list.
+- Not checked on a phone. Not done: the category totals reuse the existing conversion logic rather than a shared extraction from `AnalyticsViewModel`, which was left untouched.
