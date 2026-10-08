@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.ritesh.cashiro.MainActivity
 import com.ritesh.cashiro.R
+import com.ritesh.cashiro.domain.service.BillReminder
 import com.ritesh.cashiro.domain.service.RecurringEvent
 import com.ritesh.cashiro.domain.service.RecurringResult
 import com.ritesh.cashiro.receiver.RecurringActionReceiver
@@ -30,6 +31,32 @@ class RecurringNotifier @Inject constructor(
         result.created.forEach { notifyCreated(it) }
         result.pending.forEach { notifyDue(it) }
         result.reminders.forEach { notifyReminder(it) }
+    }
+
+    fun showBills(reminders: List<BillReminder>) {
+        reminders.forEach { reminder ->
+            val sub = reminder.subscription
+            val title = when {
+                reminder.overdue -> context.getString(R.string.bill_notif_overdue_title, sub.merchantName)
+                reminder.daysUntil == 0L -> context.getString(R.string.bill_notif_due_today_title, sub.merchantName)
+                else -> context.resources.getQuantityString(
+                    R.plurals.bill_notif_due_in_title,
+                    reminder.daysUntil.toInt(),
+                    sub.merchantName,
+                    reminder.daysUntil.toInt()
+                )
+            }
+            post(
+                id = BILL_NOTIFICATION_BASE + (sub.id.toInt() and 0xFFFFFF),
+                title = title,
+                text = context.getString(
+                    R.string.bill_notif_text,
+                    CurrencyFormatter.formatCurrency(sub.amount, sub.currency),
+                    reminder.dueDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+                ),
+                channelId = BILLS_CHANNEL_ID
+            )
+        }
     }
 
     /** Clears a due-date notification once the user answered it. */
@@ -82,7 +109,8 @@ class RecurringNotifier @Inject constructor(
         id: Int,
         title: String,
         text: String,
-        actions: List<NotificationCompat.Action> = emptyList()
+        actions: List<NotificationCompat.Action> = emptyList(),
+        channelId: String = CHANNEL_ID
     ) {
         ensureChannel()
         val open = PendingIntent.getActivity(
@@ -93,7 +121,7 @@ class RecurringNotifier @Inject constructor(
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.cashiro)
             .setContentTitle(title)
             .setContentText(text)
@@ -127,6 +155,13 @@ class RecurringNotifier @Inject constructor(
                 NotificationManager.IMPORTANCE_DEFAULT
             )
         )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                BILLS_CHANNEL_ID,
+                context.getString(R.string.bills_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+        )
     }
 
     /** Stable per schedule and date, even numbers only, so reminders can use the odd one next to it. */
@@ -135,5 +170,7 @@ class RecurringNotifier @Inject constructor(
 
     companion object {
         const val CHANNEL_ID = "recurring_transactions"
+        const val BILLS_CHANNEL_ID = "bill_reminders"
+        private const val BILL_NOTIFICATION_BASE = 1_500_000_000
     }
 }

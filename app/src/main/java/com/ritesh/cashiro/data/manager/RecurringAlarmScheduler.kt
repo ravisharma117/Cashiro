@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.ritesh.cashiro.data.database.dao.RecurringTransactionDao
+import com.ritesh.cashiro.data.database.dao.SubscriptionDao
+import com.ritesh.cashiro.data.preferences.UserPreferencesRepository
+import com.ritesh.cashiro.domain.service.BillReminderProcessor
 import com.ritesh.cashiro.domain.service.RecurringProcessor
 import com.ritesh.cashiro.receiver.RecurringAlarmReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -13,6 +16,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
 
 /**
  * Keeps one exact alarm set for the next moment a recurring schedule needs attention: a due
@@ -21,12 +25,20 @@ import javax.inject.Singleton
 @Singleton
 class RecurringAlarmScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val dao: RecurringTransactionDao
+    private val dao: RecurringTransactionDao,
+    private val subscriptionDao: SubscriptionDao,
+    private val preferences: UserPreferencesRepository
 ) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     suspend fun reschedule(now: LocalDateTime = LocalDateTime.now()) {
-        val wake = RecurringProcessor.nextWake(now, dao.getActive())
+        val enabled = preferences.upcomingNotificationsEnabled.first()
+        val disabled = preferences.disabledSubscriptionNotificationIds.first()
+            .mapNotNull { it.toLongOrNull() }.toSet()
+        val wake = listOfNotNull(
+            RecurringProcessor.nextWake(now, dao.getActive()),
+            BillReminderProcessor.nextWake(now, subscriptionDao.getActiveList(), enabled, disabled)
+        ).minOrNull()
         if (wake == null) {
             cancel()
             return

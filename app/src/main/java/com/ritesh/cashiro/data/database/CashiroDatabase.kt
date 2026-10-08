@@ -85,9 +85,10 @@ import com.ritesh.cashiro.data.database.entity.WebhookProfileEntity
             com.ritesh.cashiro.data.database.entity.LendBorrowPersonEntity::class,
             com.ritesh.cashiro.data.database.entity.LendBorrowTransactionEntity::class,
             com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity::class,
-            com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity::class
+            com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity::class,
+            com.ritesh.cashiro.data.database.entity.BillPaymentEntity::class
         ],
-        version = 63,
+        version = 64,
     exportSchema = true,
     autoMigrations =
         [
@@ -136,6 +137,7 @@ abstract class CashiroDatabase : RoomDatabase() {
     abstract fun bankNotificationDao(): BankNotificationDao
     abstract fun lendBorrowDao(): com.ritesh.cashiro.data.database.dao.LendBorrowDao
     abstract fun recurringTransactionDao(): com.ritesh.cashiro.data.database.dao.RecurringTransactionDao
+    abstract fun billPaymentDao(): com.ritesh.cashiro.data.database.dao.BillPaymentDao
 
     companion object {
         const val DATABASE_NAME = "pennywise_database"
@@ -670,6 +672,25 @@ MIGRATION_55_56,
                         )
                         """.trimIndent()
                     )
+                }
+            }
+
+        val MIGRATION_63_64 =
+            object : Migration(63, 64) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    // Bill and subscription columns, per-cycle payments (copied from the exported schema 64)
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `kind` TEXT NOT NULL DEFAULT 'SUBSCRIPTION'")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `bill_type` TEXT NOT NULL DEFAULT 'OTHER'")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `is_variable_amount` INTEGER NOT NULL DEFAULT 0")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `reminder_days_before` INTEGER")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `recurring_id` INTEGER")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `pay_from_bank` TEXT")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `pay_from_last4` TEXT")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `last_reminder_for` TEXT")
+                    db.execSQL("ALTER TABLE `subscriptions` ADD COLUMN `overdue_reminded_for` TEXT")
+                    db.execSQL("CREATE TABLE IF NOT EXISTS `bill_payments` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `subscription_id` INTEGER NOT NULL, `due_date` TEXT NOT NULL, `amount` TEXT NOT NULL, `status` TEXT NOT NULL, `paid_date` TEXT, `transaction_id` INTEGER, `created_at` TEXT NOT NULL, FOREIGN KEY(`subscription_id`) REFERENCES `subscriptions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                    db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_bill_payments_subscription_id_due_date` ON `bill_payments` (`subscription_id`, `due_date`)")
+                    db.execSQL("INSERT OR IGNORE INTO `bill_payments` (`subscription_id`, `due_date`, `amount`, `status`, `paid_date`, `transaction_id`, `created_at`) SELECT `id`, `last_paid_date`, `amount`, 'PAID', `last_paid_date`, NULL, strftime('%Y-%m-%dT%H:%M:%S', 'now') FROM `subscriptions` WHERE `last_paid_date` IS NOT NULL")
                 }
             }
 

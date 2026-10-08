@@ -268,6 +268,12 @@ class BackupImporter @Inject constructor(
                     database.lendBorrowDao().insertTransaction(tx)
                 }
 
+                // Only payments whose subscription is in the backup (a payment needs its subscription)
+                val restoredSubscriptionIds = backup.database.subscriptions.map { it.id }.toSet()
+                database.billPaymentDao().insertAll(
+                    backup.database.billPayments.filter { it.subscriptionId in restoredSubscriptionIds }
+                )
+
                 // Schedules keep their ids, so their history lines up as saved
                 database.recurringTransactionDao().let { dao ->
                     backup.database.recurringTransactions.forEach { dao.insert(it) }
@@ -615,7 +621,8 @@ class BackupImporter @Inject constructor(
             val sanitizedSubscription = subscription.sanitize()
             val key = "${sanitizedSubscription.merchantName}_${sanitizedSubscription.amount}"
             if (!existingKeys.contains(key)) {
-                val newSubscription = sanitizedSubscription.copy(id = 0)
+                // The recurring link points at the old schedule id, which a merge does not keep
+                val newSubscription = sanitizedSubscription.copy(id = 0, recurringId = null)
                 database.subscriptionDao().insertSubscription(newSubscription)
             }
         }

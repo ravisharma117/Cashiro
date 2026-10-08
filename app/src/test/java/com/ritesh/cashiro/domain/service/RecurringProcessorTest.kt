@@ -256,6 +256,25 @@ class RecurringProcessorTest {
     }
 
     @Test
+    fun nextWakeWaitsForRunTimeInsteadOfPollingThroughTheNight() = runBlocking<Unit> {
+        // The reminder moment was yesterday 08:00 and has not been sent; it is 03:00 now.
+        val s = RecurringTransactionEntity(
+            id = 1, title = "A", amount = BigDecimal.ONE, category = "c",
+            startDate = LocalDate.parse("2026-10-12"), nextRunDate = LocalDate.parse("2026-10-12"),
+            reminderDaysBefore = 3
+        )
+        assertEquals(
+            at("2026-10-10T08:00:00"),
+            RecurringProcessor.nextWake(at("2026-10-10T03:00:00"), listOf(s))
+        )
+        // After 08:00 the same overdue reminder is handled within a minute.
+        assertEquals(
+            at("2026-10-10T09:01:00"),
+            RecurringProcessor.nextWake(at("2026-10-10T09:00:00"), listOf(s))
+        )
+    }
+
+    @Test
     fun nextWakeIgnoresPausedSchedulesAndHandlesOverdueWork() = runBlocking<Unit> {
         val now = at("2026-10-10T10:00:00")
         val paused = RecurringTransactionEntity(

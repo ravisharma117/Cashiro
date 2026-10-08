@@ -142,7 +142,18 @@ class RecurringProcessor(
                 }
             }
             val earliest = moments.minOrNull() ?: return null
-            return if (earliest.isAfter(now)) earliest else now.plusMinutes(1)
+            return actionableAt(earliest, now)
+        }
+
+        /**
+         * When work whose moment is [moment] can really be done. A moment already past is
+         * actionable in a minute, except before [RUN_TIME]: nothing is due yet then, so waiting
+         * for [RUN_TIME] avoids waking up every minute through the night.
+         */
+        fun actionableAt(moment: LocalDateTime, now: LocalDateTime): LocalDateTime = when {
+            moment.isAfter(now) -> moment
+            now.toLocalTime().isBefore(RUN_TIME) -> now.toLocalDate().atTime(RUN_TIME)
+            else -> now.plusMinutes(1)
         }
     }
 }

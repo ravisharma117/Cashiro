@@ -151,7 +151,11 @@ data class DatabaseSnapshot(
     val recurringTransactions: List<com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity> = emptyList(),
 
     @SerializedName("recurring_occurrences")
-    val recurringOccurrences: List<com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity> = emptyList()
+    val recurringOccurrences: List<com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity> = emptyList(),
+
+    // Absent in backups made before bills were tracked per cycle
+    @SerializedName("bill_payments")
+    val billPayments: List<com.ritesh.cashiro.data.database.entity.BillPaymentEntity> = emptyList()
 )
 
 data class WebhookProfileBackup(

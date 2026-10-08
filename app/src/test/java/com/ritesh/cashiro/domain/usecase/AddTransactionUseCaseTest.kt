@@ -376,7 +376,7 @@ class AddTransactionUseCaseTest {
         transactionDao = dao
         val transactionRepo = TransactionRepository(dao, accountBalanceRepo)
         val subscriptionDao = FakeSubscriptionDao()
-        val subscriptionRepo = SubscriptionRepository(subscriptionDao)
+        val subscriptionRepo = SubscriptionRepository(subscriptionDao, com.ritesh.cashiro.data.repository.FakeBillPaymentDao())
         return Pair(
             AddTransactionUseCase(transactionRepo, subscriptionRepo, accountBalanceRepo),
             transactionRepo
@@ -485,6 +485,9 @@ class AddTransactionUseCaseTest {
         override suspend fun getSubscriptionByMerchantAmountAndDate(merchantName: String, amount: BigDecimal, paymentDate: java.time.LocalDate): com.ritesh.cashiro.data.database.entity.SubscriptionEntity? = null
         override suspend fun getSubscriptionByMerchantAndAmount(merchantName: String, amount: BigDecimal): com.ritesh.cashiro.data.database.entity.SubscriptionEntity? = null
         override suspend fun getSubscriptionById(id: Long): com.ritesh.cashiro.data.database.entity.SubscriptionEntity? = null
+        override suspend fun getByRecurringId(recurringId: Long): com.ritesh.cashiro.data.database.entity.SubscriptionEntity? = null
+        override suspend fun getActiveList(): List<com.ritesh.cashiro.data.database.entity.SubscriptionEntity> = emptyList()
+        override suspend fun updateReminderMarks(id: Long, beforeDue: java.time.LocalDate?, overdue: java.time.LocalDate?) = Unit
         override suspend fun updateSubscription(subscription: com.ritesh.cashiro.data.database.entity.SubscriptionEntity) = Unit
         override suspend fun updateSubscriptionState(id: Long, state: com.ritesh.cashiro.data.database.entity.SubscriptionState) = Unit
         override suspend fun updateNextPaymentDate(id: Long, nextPaymentDate: java.time.LocalDate) = Unit
