@@ -354,10 +354,11 @@ class SmsReaderWorker @AssistedInject constructor(
                             )
 
                             // If matched to active subscription, update the entity to mark as recurring
+                            var settledDueDate: java.time.LocalDate? = null
                             val finalEntity = if (matchedSubscription != null) {
                                 Log.d(TAG, "Transaction matched to active subscription: ${matchedSubscription.merchantName}")
-                                // Update next payment date for the subscription
-                                subscriptionRepository.updateNextPaymentDateAfterCharge(
+                                // Record the payment and move the subscription to its next due date
+                                settledDueDate = subscriptionRepository.updateNextPaymentDateAfterCharge(
                                     matchedSubscription.id,
                                     entityWithRules.dateTime.toLocalDate()
                                 )
@@ -369,6 +370,9 @@ class SmsReaderWorker @AssistedInject constructor(
                             
                             val rowId = transactionRepository.insertTransaction(finalEntityForInsert)
                             if (rowId != -1L) {
+                                if (matchedSubscription != null && settledDueDate != null) {
+                                    subscriptionRepository.linkPaymentTransaction(matchedSubscription.id, settledDueDate, rowId)
+                                }
                                 savedCount++
                                 Log.d(TAG, "Saved new transaction with ID: $rowId${if (finalEntityForInsert.isRecurring) " (Recurring)" else ""}")
 

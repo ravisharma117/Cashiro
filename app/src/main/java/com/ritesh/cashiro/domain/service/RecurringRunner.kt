@@ -1,6 +1,9 @@
 package com.ritesh.cashiro.domain.service
 
 import com.ritesh.cashiro.data.database.dao.RecurringTransactionDao
+import com.ritesh.cashiro.data.database.dao.SubscriptionDao
+import com.ritesh.cashiro.data.preferences.UserPreferencesRepository
+import com.ritesh.cashiro.data.repository.SubscriptionRepository
 import com.ritesh.cashiro.data.database.entity.OccurrenceStatus
 import com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity
 import com.ritesh.cashiro.data.manager.RecurringAlarmScheduler
@@ -10,6 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -23,14 +27,24 @@ class RecurringRunner @Inject constructor(
     private val dao: RecurringTransactionDao,
     private val addTransaction: AddTransactionUseCase,
     private val notifier: RecurringNotifier,
-    private val scheduler: RecurringAlarmScheduler
+    private val scheduler: RecurringAlarmScheduler,
+    private val subscriptionDao: SubscriptionDao,
+    private val subscriptions: SubscriptionRepository,
+    private val preferences: UserPreferencesRepository
 ) {
     private val mutex = Mutex()
     private val processor = RecurringProcessor(dao, ::createTransaction)
+    private val billReminders = BillReminderProcessor(subscriptionDao)
 
     suspend fun run(now: LocalDateTime = LocalDateTime.now()) = mutex.withLock {
         val result = processor.process(now)
         notifier.show(result)
+
+        val enabled = preferences.upcomingNotificationsEnabled.first()
+        val disabled = preferences.disabledSubscriptionNotificationIds.first()
+            .mapNotNull { it.toLongOrNull() }.toSet()
+        notifier.showBills(billReminders.process(now, enabled, disabled))
+
         scheduler.reschedule(now)
     }
 
@@ -47,6 +61,27 @@ class RecurringRunner @Inject constructor(
     }
 
     private suspend fun createTransaction(
+        schedule: RecurringTransactionEntity,
+        dueDate: LocalDate
+    ): Long = createAndSettle(schedule, dueDate)
+
+    private suspend fun createAndSettle(schedule: RecurringTransactionEntity, dueDate: LocalDate): Long {
+        val transactionId = insertTransaction(schedule, dueDate)
+        // A bill linked to this schedule is paid by this transaction. The guard leaves a cycle
+        // alone that was already paid in advance.
+        subscriptions.getByRecurringId(schedule.id)?.let { bill ->
+            subscriptions.settleCurrentCycle(
+                subscriptionId = bill.id,
+                paidDate = dueDate,
+                amount = schedule.amount,
+                transactionId = transactionId,
+                onlyIfDueOnOrBefore = dueDate
+            )
+        }
+        return transactionId
+    }
+
+    private suspend fun insertTransaction(
         schedule: RecurringTransactionEntity,
         dueDate: LocalDate
     ): Long = addTransaction.execute(

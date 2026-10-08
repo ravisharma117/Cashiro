@@ -72,3 +72,18 @@ Plan 11 (recurring schedules to link to).
 
 - Keep the table name `subscriptions` and add `kind` (recommended; no data move) versus renaming to a neutral name.
 - Whether rent belongs here or only under recurring transactions. Recommended: here as a bill type, linked to a schedule when the user wants the transaction created automatically.
+
+## Outcome (2026-10-08)
+
+Built without Plans 9 and 10, so the Home widget is unchanged and "Mark paid" creates the expense through the existing add path.
+
+- Database version 64: new columns on `subscriptions` (kind, bill type, variable amount, reminder days, recurring link, pay-from account, reminder marks) and the `bill_payments` table (unique per subscription and due date). Existing rows stay subscriptions; a paid row is back-filled from each last paid date. Table name `subscriptions` kept. Backups include `bill_payments`; a merge import drops the recurring link, because schedule ids change.
+- Screen renamed "Bills & Subscriptions", with All / Bills / Subscriptions filter, an Upcoming payments card (next 30 days, overdue first, with total), a Bill tag, and a payment history plus "Skip this payment" in the detail sheet.
+- "Mark paid" asks: add the expense (amount editable, a variable bill remembers the real amount) or only record the payment. It is idempotent per cycle.
+- An SMS that matches a bill marks the cycle paid and stores the transaction id; a variable bill matches on merchant alone.
+- Recurring link: the form switch "Add the transaction for me" creates a recurring schedule from the billing cycle. That schedule's transaction settles the cycle; marking paid by hand steps the schedule over so nothing is added twice; a cycle paid in advance is left alone.
+- Reminders: bills 3 days ahead by default, per-bill choice, one overdue reminder per due date, on their own channel. The global switch and per-item switches are respected. Uses the same exact alarm as recurring transactions.
+- A new bill is entered with the date it is next due and logs nothing until paid. A subscription keeps the old behaviour.
+- Also fixed: the Plan 11 alarm could wake every minute overnight when a reminder time had already passed.
+- Not done: Home widget "Upcoming payments", account choice shown in the bill form beyond the existing account picker, bill-type filter chips.
+- 31 new tests. Not yet checked on a phone.

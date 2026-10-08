@@ -53,6 +53,7 @@ constructor(
     private val accountOrderUseCase: AccountOrderUseCase,
     private val subscriptionRepository: SubscriptionRepository,
     private val updateSubscriptionUseCase: UpdateSubscriptionUseCase,
+    private val billRecurringLink: com.ritesh.cashiro.domain.usecase.BillRecurringLinkUseCase,
     private val currencyRepository: CurrencyRepository,
     val attachmentService: AttachmentService,
     @ApplicationContext private val context: Context
@@ -477,6 +478,11 @@ constructor(
                             subcategory = subscription.subcategory,
                             currency = subscription.currency,
                             notes = subscription.smsBody ?: "",
+                            kind = subscription.kind,
+                            billType = subscription.billType,
+                            isVariableAmount = subscription.isVariableAmount,
+                            reminderDays = subscription.reminderDaysBefore,
+                            autoAddTransaction = subscription.recurringId != null,
                             isLoading = false
                         )
                     }
@@ -583,6 +589,26 @@ constructor(
         _subscriptionUiState.update { currentState -> currentState.copy(subcategory = subcategory) }
     }
 
+    fun updateSubscriptionKind(kind: com.ritesh.cashiro.data.database.entity.SubscriptionKind) {
+        _subscriptionUiState.update { it.copy(kind = kind) }
+    }
+
+    fun updateBillType(type: com.ritesh.cashiro.data.database.entity.BillType) {
+        _subscriptionUiState.update { it.copy(billType = type) }
+    }
+
+    fun updateBillVariableAmount(variable: Boolean) {
+        _subscriptionUiState.update { it.copy(isVariableAmount = variable) }
+    }
+
+    fun updateBillReminderDays(days: Int?) {
+        _subscriptionUiState.update { it.copy(reminderDays = days) }
+    }
+
+    fun updateBillAutoAdd(autoAdd: Boolean) {
+        _subscriptionUiState.update { it.copy(autoAddTransaction = autoAdd) }
+    }
+
     fun updateSubscriptionNotes(notes: String) {
         _subscriptionUiState.update { currentState -> currentState.copy(notes = notes) }
     }
@@ -653,18 +679,27 @@ constructor(
                             bankName = state.selectedAccount?.bankName,
                             currency = state.currency,
                             smsBody = state.notes.takeIf { it.isNotBlank() },
+                            kind = state.kind,
+                            billType = state.billType,
+                            isVariableAmount = state.isVariableAmount,
+                            reminderDaysBefore = state.reminderDays,
+                            payFromBank = state.selectedAccount?.bankName,
+                            payFromLast4 = state.selectedAccount?.accountLast4,
                             updatedAt = java.time.LocalDateTime.now()
                         )
                         updateSubscriptionUseCase.execute(updatedSubscription)
+                        applyAutoAdd(updatedSubscription, state.autoAddTransaction && state.kind == com.ritesh.cashiro.data.database.entity.SubscriptionKind.BILL)
                         Log.d("AddViewModel", "Subscription updated successfully: ${state.subscriptionId}")
                     } else {
                         throw Exception(context.getString(R.string.err_subscription_not_found))
                     }
                 } else {
-                    // Create new subscription
+                    // A bill is entered with the date it is next due, so nothing has been paid yet;
+                    // a subscription is entered with the date of its first payment.
+                    val isBill = state.kind == com.ritesh.cashiro.data.database.entity.SubscriptionKind.BILL
                     val transactionDate = state.nextPaymentDate.atTime(LocalTime.now())
-                    
-                    addTransactionUseCase.execute(
+
+                    if (!isBill) addTransactionUseCase.execute(
                         amount = amount,
                         merchant = state.serviceName.trim(),
                         category = state.category,
@@ -681,7 +716,8 @@ constructor(
                         createSubscription = false
                     )
 
-                    val actualNextPaymentDate = SubscriptionUtils.calculateNextPaymentDate(state.nextPaymentDate, billingCycleToSave)
+                    val actualNextPaymentDate = if (isBill) state.nextPaymentDate
+                        else SubscriptionUtils.calculateNextPaymentDate(state.nextPaymentDate, billingCycleToSave)
                     Log.d("AddViewModel", "DEBUG_SUBSCRIPTION: fromDate=${state.nextPaymentDate}, billingCycle=$billingCycleToSave, today=${LocalDate.now()}, result=$actualNextPaymentDate")
 
                     val subscriptionId =
@@ -697,8 +733,18 @@ constructor(
                             paymentReminder = false, // Not implemented yet
                             currency = state.currency,
                             notes = state.notes.takeIf { it.isNotBlank() },
-                            lastPaidDate = state.nextPaymentDate
+                            lastPaidDate = if (isBill) null else state.nextPaymentDate,
+                            kind = state.kind,
+                            billType = state.billType,
+                            isVariableAmount = state.isVariableAmount,
+                            reminderDaysBefore = state.reminderDays,
+                            payFromBank = state.selectedAccount?.bankName,
+                            payFromLast4 = state.selectedAccount?.accountLast4
                         )
+
+                    if (isBill && state.autoAddTransaction) {
+                        subscriptionRepository.getSubscriptionById(subscriptionId)?.let { billRecurringLink.link(it) }
+                    }
 
                     Log.d("AddViewModel", "Subscription saved successfully with ID: $subscriptionId")
                 }
@@ -718,6 +764,13 @@ constructor(
         }
     }
     
+
+    /** Keeps the bill's recurring schedule in step with the "add the transaction for me" switch. */
+    private suspend fun applyAutoAdd(subscription: com.ritesh.cashiro.data.database.entity.SubscriptionEntity, wanted: Boolean) {
+        val current = subscriptionRepository.getSubscriptionById(subscription.id) ?: return
+        if (wanted && current.recurringId == null) billRecurringLink.link(current)
+        if (!wanted && current.recurringId != null) billRecurringLink.unlink(current)
+    }
 
     // Validation helpers
     private fun validateAmount(amount: String): String? {
@@ -807,6 +860,14 @@ data class SubscriptionUiState(
     val customCycleCount: Int = 1,
     val customCycleUnit: String = "month",
     val customCycleEndDate: LocalDate? = null,
+    val kind: com.ritesh.cashiro.data.database.entity.SubscriptionKind =
+        com.ritesh.cashiro.data.database.entity.SubscriptionKind.SUBSCRIPTION,
+    val billType: com.ritesh.cashiro.data.database.entity.BillType = com.ritesh.cashiro.data.database.entity.BillType.OTHER,
+    val isVariableAmount: Boolean = false,
+    /** Null uses the default (bills 3 days before, subscriptions none); 0 turns reminders off. */
+    val reminderDays: Int? = null,
+    /** A recurring schedule adds this bill's transaction on each due date. */
+    val autoAddTransaction: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null
 ) {

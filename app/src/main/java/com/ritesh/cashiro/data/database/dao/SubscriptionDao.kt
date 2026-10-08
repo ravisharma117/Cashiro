@@ -46,6 +46,15 @@ interface SubscriptionDao {
     
     @Query("SELECT * FROM subscriptions WHERE id = :id")
     suspend fun getSubscriptionById(id: Long): SubscriptionEntity?
+
+    @Query("SELECT * FROM subscriptions WHERE recurring_id = :recurringId LIMIT 1")
+    suspend fun getByRecurringId(recurringId: Long): SubscriptionEntity?
+
+    @Query("SELECT * FROM subscriptions WHERE state = 'ACTIVE' ORDER BY next_payment_date ASC")
+    suspend fun getActiveList(): List<SubscriptionEntity>
+
+    @Query("UPDATE subscriptions SET last_reminder_for = :beforeDue, overdue_reminded_for = :overdue WHERE id = :id")
+    suspend fun updateReminderMarks(id: Long, beforeDue: LocalDate?, overdue: LocalDate?)
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSubscription(subscription: SubscriptionEntity): Long

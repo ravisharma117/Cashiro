@@ -1,6 +1,9 @@
 package com.ritesh.cashiro.data.repository
 
+import com.ritesh.cashiro.data.database.dao.BillPaymentDao
 import com.ritesh.cashiro.data.database.dao.SubscriptionDao
+import com.ritesh.cashiro.data.database.entity.BillPaymentEntity
+import com.ritesh.cashiro.data.database.entity.BillPaymentStatus
 import com.ritesh.cashiro.data.database.entity.SubscriptionEntity
 import com.ritesh.cashiro.data.database.entity.SubscriptionState
 import com.ritesh.parser.core.bank.HDFCBankParser
@@ -16,10 +19,12 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 import android.util.Log
+import com.ritesh.cashiro.utils.SubscriptionUtils
 
 @Singleton
 class SubscriptionRepository @Inject constructor(
-    private val subscriptionDao: SubscriptionDao
+    private val subscriptionDao: SubscriptionDao,
+    private val billPaymentDao: BillPaymentDao
 ) {
     
     companion object {
@@ -84,9 +89,11 @@ class SubscriptionRepository @Inject constructor(
     ): SubscriptionEntity? {
         val activeSubscription = subscriptionDao.getActiveSubscriptionByMerchant(merchantName)
         
-        // Check if amounts match (with some tolerance for small variations)
-        return if (activeSubscription != null && 
-                   areAmountsEqual(activeSubscription.amount, amount)) {
+        // A variable bill (electricity) changes each cycle, so the merchant alone identifies it.
+        // Otherwise the amounts must match, with a little tolerance.
+        return if (activeSubscription != null &&
+                   (activeSubscription.isVariableAmount ||
+                    areAmountsEqual(activeSubscription.amount, amount))) {
             activeSubscription
         } else {
             null
@@ -99,10 +106,87 @@ class SubscriptionRepository @Inject constructor(
     suspend fun updateNextPaymentDateAfterCharge(
         subscriptionId: Long,
         chargeDate: LocalDate = LocalDate.now()
-    ) {
-        // Assume monthly subscription, add 30 days
-        val nextDate = chargeDate.plusDays(30)
-        subscriptionDao.updateNextPaymentDate(subscriptionId, nextDate)
+    ): LocalDate? = settleCurrentCycle(subscriptionId, chargeDate, amount = null, transactionId = null)
+
+    fun observePayments(subscriptionId: Long): Flow<List<BillPaymentEntity>> =
+        billPaymentDao.observeFor(subscriptionId)
+
+    suspend fun getByRecurringId(recurringId: Long): SubscriptionEntity? =
+        subscriptionDao.getByRecurringId(recurringId)
+
+    /**
+     * Records that the current billing cycle was paid and moves to the next due date. Returns the
+     * due date that was settled, or null when it had already been settled (so charging twice, or
+     * a recurring schedule and an SMS both seeing the same payment, never advances two cycles).
+     *
+     * [amount] is what was actually paid; a variable bill also remembers it as its new amount.
+     * [onlyIfDueOnOrBefore] makes this a no-op when the bill is not due yet by that date, which a
+     * linked recurring schedule uses so it cannot settle a cycle that was paid in advance.
+     */
+    suspend fun settleCurrentCycle(
+        subscriptionId: Long,
+        paidDate: LocalDate,
+        amount: BigDecimal?,
+        transactionId: Long?,
+        onlyIfDueOnOrBefore: LocalDate? = null
+    ): LocalDate? {
+        val sub = subscriptionDao.getSubscriptionById(subscriptionId) ?: return null
+        val due = sub.nextPaymentDate ?: paidDate
+        if (onlyIfDueOnOrBefore != null && due.isAfter(onlyIfDueOnOrBefore)) return null
+        val existing = billPaymentDao.getForCycle(subscriptionId, due)
+        if (existing != null && existing.status != BillPaymentStatus.UNPAID) return null
+
+        val paidAmount = amount ?: sub.amount
+        billPaymentDao.upsert(
+            BillPaymentEntity(
+                id = existing?.id ?: 0,
+                subscriptionId = subscriptionId,
+                dueDate = due,
+                amount = paidAmount,
+                status = BillPaymentStatus.PAID,
+                paidDate = paidDate,
+                transactionId = transactionId
+            )
+        )
+        subscriptionDao.updateSubscription(
+            sub.copy(
+                nextPaymentDate = SubscriptionUtils.calculateNextPaymentDate(due, sub.billingCycle),
+                lastPaidDate = paidDate,
+                amount = if (sub.isVariableAmount && amount != null) amount else sub.amount,
+                updatedAt = java.time.LocalDateTime.now()
+            )
+        )
+        return due
+    }
+
+    /** Skips the current cycle without a payment and moves to the next due date. */
+    suspend fun skipCurrentCycle(subscriptionId: Long): LocalDate? {
+        val sub = subscriptionDao.getSubscriptionById(subscriptionId) ?: return null
+        val due = sub.nextPaymentDate ?: return null
+        val existing = billPaymentDao.getForCycle(subscriptionId, due)
+        if (existing != null && existing.status != BillPaymentStatus.UNPAID) return null
+        billPaymentDao.upsert(
+            BillPaymentEntity(
+                id = existing?.id ?: 0,
+                subscriptionId = subscriptionId,
+                dueDate = due,
+                amount = sub.amount,
+                status = BillPaymentStatus.SKIPPED
+            )
+        )
+        subscriptionDao.updateSubscription(
+            sub.copy(
+                nextPaymentDate = SubscriptionUtils.calculateNextPaymentDate(due, sub.billingCycle),
+                updatedAt = java.time.LocalDateTime.now()
+            )
+        )
+        return due
+    }
+
+    /** Attaches the transaction to a payment that was recorded before the transaction existed. */
+    suspend fun linkPaymentTransaction(subscriptionId: Long, dueDate: LocalDate, transactionId: Long) {
+        val payment = billPaymentDao.getForCycle(subscriptionId, dueDate) ?: return
+        billPaymentDao.update(payment.copy(transactionId = transactionId))
     }
     
     

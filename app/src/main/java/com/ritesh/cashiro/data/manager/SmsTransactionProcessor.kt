@@ -182,9 +182,10 @@ class SmsTransactionProcessor @Inject constructor(
                 entityWithRules.amount
             )
 
+            var settledDueDate: java.time.LocalDate? = null
             val finalEntity = if (matchedSubscription != null) {
                 Log.d(TAG, "Transaction matched to active subscription: ${matchedSubscription.merchantName}")
-                subscriptionRepository.updateNextPaymentDateAfterCharge(
+                settledDueDate = subscriptionRepository.updateNextPaymentDateAfterCharge(
                     matchedSubscription.id,
                     entityWithRules.dateTime.toLocalDate()
                 )
@@ -196,6 +197,9 @@ class SmsTransactionProcessor @Inject constructor(
 
             val rowId = transactionRepository.insertTransaction(finalEntityForInsert)
             if (rowId != -1L) {
+                if (matchedSubscription != null && settledDueDate != null) {
+                    subscriptionRepository.linkPaymentTransaction(matchedSubscription.id, settledDueDate, rowId)
+                }
                 Log.d(TAG, "Saved new transaction with ID: $rowId${if (finalEntityForInsert.isRecurring) " (Recurring)" else ""}")
 
                 // Save rule applications if any rules were applied

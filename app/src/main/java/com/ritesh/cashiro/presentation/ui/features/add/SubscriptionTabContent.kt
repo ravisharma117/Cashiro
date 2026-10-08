@@ -709,6 +709,15 @@ fun SubscriptionTabContent(
                         unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.7f)
                     ),
                 )
+
+                BillOptionsSection(
+                    state = uiState,
+                    onKind = viewModel::updateSubscriptionKind,
+                    onBillType = viewModel::updateBillType,
+                    onVariable = viewModel::updateBillVariableAmount,
+                    onReminder = viewModel::updateBillReminderDays,
+                    onAutoAdd = viewModel::updateBillAutoAdd
+                )
             }
 
             // Attachments Section

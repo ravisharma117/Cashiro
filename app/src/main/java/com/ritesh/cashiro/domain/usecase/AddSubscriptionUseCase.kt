@@ -24,7 +24,14 @@ constructor(private val subscriptionRepository: SubscriptionRepository) {
         paymentReminder: Boolean = true,
         currency: String = "INR",
         notes: String? = null,
-        lastPaidDate: LocalDate? = null
+        lastPaidDate: LocalDate? = null,
+        kind: com.ritesh.cashiro.data.database.entity.SubscriptionKind =
+            com.ritesh.cashiro.data.database.entity.SubscriptionKind.SUBSCRIPTION,
+        billType: com.ritesh.cashiro.data.database.entity.BillType = com.ritesh.cashiro.data.database.entity.BillType.OTHER,
+        isVariableAmount: Boolean = false,
+        reminderDaysBefore: Int? = null,
+        payFromBank: String? = null,
+        payFromLast4: String? = null
     ): Long {
         Log.d("AddSubscriptionUseCase", "Creating subscription entity...")
 
@@ -41,7 +48,13 @@ constructor(private val subscriptionRepository: SubscriptionRepository) {
             updatedAt = LocalDateTime.now(),
             currency = currency,
             billingCycle = billingCycle,
-            lastPaidDate = lastPaidDate
+            lastPaidDate = lastPaidDate,
+            kind = kind,
+            billType = billType,
+            isVariableAmount = isVariableAmount,
+            reminderDaysBefore = reminderDaysBefore,
+            payFromBank = payFromBank,
+            payFromLast4 = payFromLast4
         )
 
         Log.d("AddSubscriptionUseCase", "Subscription entity created: $subscription")

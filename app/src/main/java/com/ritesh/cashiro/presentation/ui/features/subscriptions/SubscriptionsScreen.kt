@@ -186,7 +186,7 @@ fun SubscriptionsScreen(
             CustomTitleTopAppBar(
                 scrollBehaviorSmall = scrollBehaviorSmall,
                 scrollBehaviorLarge = scrollBehaviorLarge,
-                title = stringResource(R.string.subscriptions),
+                title = stringResource(R.string.bills_and_subscriptions),
                 hasBackButton = true,
                 hazeState = hazeState,
                 navigationContent = { NavigationContent(onNavigateBack) }
@@ -195,6 +195,7 @@ fun SubscriptionsScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         val selectedSubscription = uiState.selectedSubscription
+        val payments by subscriptionsViewModel.selectedPayments.collectAsState()
         var subscriptionToDelete by remember { mutableStateOf<SubscriptionEntity?>(null) }
         
         if (subscriptionToDelete != null) {
@@ -219,11 +220,20 @@ fun SubscriptionsScreen(
                 convertedAmount = uiState.convertedAmounts[selectedSubscription.id],
                 targetCurrency = uiState.targetCurrency,
                 onDismiss = { subscriptionsViewModel.selectSubscription(null) },
-                onMarkAsPaid = { subscriptionsViewModel.markAsPaid(selectedSubscription) },
+                payments = payments,
+                onMarkAsPaid = { subscriptionsViewModel.requestMarkPaid(selectedSubscription) },
+                onSkip = { subscriptionsViewModel.skipCycle(selectedSubscription) },
                 onEdit = {
                     subscriptionsViewModel.selectSubscription(null)
                     onEditSubscription(selectedSubscription.id)
                 }
+            )
+        }
+        uiState.markPaidTarget?.let { target ->
+            MarkPaidDialog(
+                subscription = target,
+                onDismiss = { subscriptionsViewModel.dismissMarkPaid() },
+                onConfirm = { amount, addExpense -> subscriptionsViewModel.confirmPaid(target, amount, addExpense) }
             )
         }
         LazyColumn(
@@ -251,6 +261,24 @@ fun SubscriptionsScreen(
                 }
             }
 
+            item {
+                KindFilterRow(
+                    selected = uiState.kindFilter,
+                    onSelect = { subscriptionsViewModel.setKindFilter(it) }
+                )
+            }
+
+            if (!uiState.upcoming.isEmpty) {
+                item {
+                    UpcomingPaymentsCard(
+                        upcoming = uiState.upcoming,
+                        currency = uiState.targetCurrency,
+                        amountOf = { sub -> uiState.convertedAmounts[sub.id] ?: sub.amount },
+                        onItemClick = { subscriptionsViewModel.selectSubscription(it) }
+                    )
+                }
+            }
+
             // Total Monthly & Yearly Subscriptions Summary
             item {
                 TotalSubscriptionsSummary(
@@ -263,9 +291,9 @@ fun SubscriptionsScreen(
             }
             
             // Active Subscriptions
-            if (uiState.activeSubscriptions.isNotEmpty()) {
+            if (uiState.visibleSubscriptions.isNotEmpty()) {
                 items(
-                    items = uiState.activeSubscriptions,
+                    items = uiState.visibleSubscriptions,
                     key = { it.id }
                 ) { subscription ->
                     val categoryEntity = categoriesMap[subscription.category]
@@ -289,7 +317,7 @@ fun SubscriptionsScreen(
             }
             
             // Empty State
-            if (uiState.activeSubscriptions.isEmpty() && !uiState.isLoading) {
+            if (uiState.visibleSubscriptions.isEmpty() && !uiState.isLoading) {
                 item {
                     EmptySubscriptionsState()
                 }
@@ -642,6 +670,14 @@ private fun SwipeableSubscriptionItem(
                                     color = MaterialTheme.colorScheme.tertiary
                                 )
 
+                                // Bill tag
+                                if (subscription.kind == com.ritesh.cashiro.data.database.entity.SubscriptionKind.BILL) {
+                                    SubtitleTag(
+                                        text = stringResource(R.string.bill_tag),
+                                        color = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
+
                                 // Category Tag
                                 categoryEntity?.let { category ->
                                     SubtitleTag(
@@ -753,7 +789,9 @@ private fun PaymentStatusBottomSheet(
     targetCurrency: String? = null,
     onDismiss: () -> Unit,
     onMarkAsPaid: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    payments: List<com.ritesh.cashiro.data.database.entity.BillPaymentEntity> = emptyList(),
+    onSkip: () -> Unit = {}
 ) {
     var showSmsBody by remember { mutableStateOf(false) }
     val today = LocalDate.now()
@@ -899,6 +937,13 @@ private fun PaymentStatusBottomSheet(
                 }
             }
             
+            TextButton(onClick = onSkip) {
+                Text(stringResource(R.string.skip_payment))
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+            PaymentHistory(payments = payments, currency = subscription.currency)
+
             if (!subscription.smsBody.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(Spacing.lg))
 

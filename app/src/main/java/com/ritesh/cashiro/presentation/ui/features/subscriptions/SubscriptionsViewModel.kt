@@ -10,7 +10,13 @@ import com.ritesh.cashiro.data.database.entity.SubscriptionEntity
 import com.ritesh.cashiro.data.repository.AccountBalanceRepository
 import com.ritesh.cashiro.data.repository.CategoryRepository
 import com.ritesh.cashiro.data.repository.SubcategoryRepository
+import com.ritesh.cashiro.data.database.entity.BillPaymentEntity
 import com.ritesh.cashiro.data.repository.SubscriptionRepository
+import com.ritesh.cashiro.domain.service.UpcomingPaymentsCalculator
+import com.ritesh.cashiro.domain.usecase.BillCycleUseCase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +41,7 @@ class SubscriptionsViewModel @Inject constructor(
     private val subcategoryRepository: SubcategoryRepository,
     private val currencyConversionService: CurrencyConversionService,
     private val currencyRepository: CurrencyRepository,
+    private val billCycle: BillCycleUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     
@@ -51,6 +58,16 @@ class SubscriptionsViewModel @Inject constructor(
         .map { subcats -> subcats.associateBy { it.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
     
+    private val selectedId = MutableStateFlow<Long?>(null)
+
+    /** Payment history of the subscription whose sheet is open. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val selectedPayments: StateFlow<List<BillPaymentEntity>> = selectedId
+        .flatMapLatest { id ->
+            if (id == null) flowOf(emptyList()) else subscriptionRepository.observePayments(id)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
         loadSubscriptions()
     }
@@ -91,8 +108,15 @@ class SubscriptionsViewModel @Inject constructor(
                     }
                 }
 
+                val upcoming = UpcomingPaymentsCalculator.build(
+                    subscriptions = subscriptions,
+                    today = java.time.LocalDate.now(),
+                    amountOf = { sub -> convertedAmounts[sub.id] ?: sub.amount }
+                )
+
                 _uiState.update {
                     it.copy(
+                        upcoming = upcoming,
                         activeSubscriptions = subscriptions,
                         totalMonthlyAmount = totalMonthlyAmount,
                         totalYearlyAmount = totalMonthlyAmount.multiply(BigDecimal(12)),
@@ -125,14 +149,42 @@ class SubscriptionsViewModel @Inject constructor(
     }
 
     fun selectSubscription(subscription: SubscriptionEntity?) {
+        selectedId.value = subscription?.id
         _uiState.value = _uiState.value.copy(selectedSubscription = subscription)
     }
 
-    fun markAsPaid(subscription: SubscriptionEntity) {
+    fun setKindFilter(filter: SubscriptionKindFilter) {
+        _uiState.update { it.copy(kindFilter = filter) }
+    }
+
+    /** Opens the "add the expense or just mark paid" question. */
+    fun requestMarkPaid(subscription: SubscriptionEntity) {
+        _uiState.update { it.copy(markPaidTarget = subscription) }
+    }
+
+    fun dismissMarkPaid() {
+        _uiState.update { it.copy(markPaidTarget = null) }
+    }
+
+    /**
+     * Settles the current cycle. [addExpense] also creates the expense transaction for [amount];
+     * otherwise only the payment is recorded because the transaction already exists.
+     */
+    fun confirmPaid(subscription: SubscriptionEntity, amount: BigDecimal, addExpense: Boolean) {
         viewModelScope.launch {
-            val today = java.time.LocalDate.now()
-            val nextDate = SubscriptionUtils.calculateNextPaymentDate(subscription.nextPaymentDate ?: today, subscription.billingCycle)
-            subscriptionRepository.updatePaymentStatus(subscription.id, nextDate, today)
+            if (addExpense) {
+                billCycle.payAndAddExpense(subscription, amount)
+            } else {
+                billCycle.payWithoutTransaction(subscription, amount)
+            }
+            _uiState.update { it.copy(markPaidTarget = null) }
+            selectSubscription(null)
+        }
+    }
+
+    fun skipCycle(subscription: SubscriptionEntity) {
+        viewModelScope.launch {
+            billCycle.skipCycle(subscription)
             selectSubscription(null)
         }
     }
