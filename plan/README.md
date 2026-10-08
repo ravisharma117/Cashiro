@@ -18,15 +18,15 @@ In every plan, `$APP` means `app/src/main/java/com/ritesh/cashiro`.
 | 6 | [Privacy mode](plan%206/plan.md) | 7 | 5 | `feature/app-lock` (built with Plan 5) | ◐ totals only; device check open |
 | 7 | [Bottom navigation & More](plan%207/plan.md) | 10, 26 | 1 | `feature/navigation` | skipped (not needed) |
 | 8 | [Category transactions + analysis](plan%208/plan.md) | 10 | 7 | `feature/category-analysis` | ◐ built, device check open |
-| 9 | [Home widgets completion](plan%209/plan.md) | 9 | 4, 7 | `feature/home-customization` | ☐ |
-| 10 | [Unified transaction engine](plan%2010/plan.md) | 13, 14, 23 | 3 | `feature/transaction-engine` | ☐ |
+| 9 | [Home widgets completion](plan%209/plan.md) | 9 | 4, 7 | `feature/home-customization` | skipped (not selected) |
+| 10 | [Unified transaction engine](plan%2010/plan.md) | 13, 14, 23 | 3 | `feature/transaction-engine` | skipped (not selected) |
 | 11 | [Recurring transactions](plan%2011/plan.md) | 11 | 10 | `feature/recurring-transactions` | ☐ |
 | 12 | [Bills & subscriptions](plan%2012/plan.md) | 18 | 11 | `feature/bills` | ☐ |
-| 13 | [CSV import wizard](plan%2013/plan.md) | 12 | 10 | `feature/csv-import` | ☐ |
-| 14 | [UPI accessibility capture](plan%2014/plan.md) | 13 | 10 | `feature/upi-accessibility` | ☐ |
+| 13 | [CSV import wizard](plan%2013/plan.md) | 12 | 10 | `feature/csv-import` | skipped (not selected) |
+| 14 | [UPI accessibility capture](plan%2014/plan.md) | 13 | 10 | `feature/upi-accessibility` | skipped (not selected) |
 | 15 | [Lending reminders & repayment detection](plan%2015/plan.md) | 15 | 10, 14 | `feature/lending-borrowing` | ☐ |
-| 16 | [Startup navigator](plan%2016/plan.md) | 5 | 3, 5, 14 | `feature/startup-navigator` | ☐ |
-| 17 | [Savings goals](plan%2017/plan.md) | 19 | 9 | `feature/savings-goals` | ☐ |
+| 16 | [Startup navigator](plan%2016/plan.md) | 5 | 3, 5, 14 | `feature/startup-navigator` | skipped (not selected) |
+| 17 | [Savings goals](plan%2017/plan.md) | 19 | 9 | `feature/savings-goals` | skipped (not selected) |
 | 18 | [Net worth](plan%2018/plan.md) | 20 | 3, 17 | `feature/net-worth` | ☐ |
 | 19 | [Monthly & yearly tracker](plan%2019/plan.md) | 16, 17 | 11, 12, 18 | `feature/trackers` | ☐ |
 | 20 | [Reports, export & release hardening](plan%2020/plan.md) | 21, 22, 24 (Phase 6–7) | 19 | `feature/reports` | ☐ |
