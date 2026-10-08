@@ -28,6 +28,10 @@ data class HomeUiState(
     val upcomingSubscriptions: List<SubscriptionEntity> = emptyList(),
     val upcomingSubscriptionsTotal: BigDecimal = BigDecimal.ZERO,
     val upcomingSubscriptionsCurrency: String = "INR",
+    /** How many of the upcoming payments are past due and unpaid. */
+    val upcomingOverdueCount: Int = 0,
+    /** The next few recurring transactions that are due. */
+    val upcomingRecurring: List<com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity> = emptyList(),
     val accountBalances: List<AccountBalanceEntity> = emptyList(),
     val creditCards: List<AccountBalanceEntity> = emptyList(),
     val totalBalance: BigDecimal = BigDecimal.ZERO,

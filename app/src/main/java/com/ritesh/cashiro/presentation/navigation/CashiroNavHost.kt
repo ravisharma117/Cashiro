@@ -249,6 +249,8 @@ fun CashiroNavHost(
                             navController.safeNavigate(BudgetHistory(id))
                         },
                         onNavigateToLendBorrow = { filter -> navController.safeNavigate(LendBorrow(filter)) },
+                        onNavigateToAnalytics = { navController.safeNavigate(Analytics) },
+                        onNavigateToRecurring = { navController.safeNavigate(RecurringTransactions) },
                         onTransactionClick = { transactionId, key ->
                             navController.safeNavigate(TransactionDetail(transactionId, key))
                         },

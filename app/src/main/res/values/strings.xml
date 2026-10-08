@@ -1537,4 +1537,17 @@
     <string name="bill_form_reminder_default">3 days before (default)</string>
     <string name="bill_form_auto_add">Add the transaction for me</string>
     <string name="bill_form_auto_add_sub">Adds the expense on each due date by itself and marks the bill paid.</string>
+    <string name="home_widget_networth">Net Worth</string>
+    <string name="home_widget_monthly_summary">Monthly Summary</string>
+    <string name="home_widget_loans">Loans</string>
+    <string name="home_widget_accounts">Accounts</string>
+    <string name="home_widget_upcoming_payments">Upcoming Payments</string>
+    <string name="home_widget_recurring">Recurring</string>
+    <string name="home_widget_recent">Recent Transactions</string>
+    <string name="home_widget_budgets">Budgets</string>
+    <string name="home_widget_heatmap">Activity Heatmap</string>
+    <string name="home_savings">Savings</string>
+    <string name="home_savings_rate">%1$s%% saved</string>
+    <plurals name="home_upcoming_payments_count"><item quantity="one">%d upcoming payment</item><item quantity="other">%d upcoming payments</item></plurals>
+    <string name="home_upcoming_overdue">%1$d overdue</string>
 </resources>

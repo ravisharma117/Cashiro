@@ -48,13 +48,11 @@ fun EditWidgetsSheet(
     onToggleVisibility: (HomeWidget, Boolean) -> Unit,
     onReorder: (List<HomeWidget>) -> Unit
 ) {
-    // Filter out Networth Summary
-    var reorderableWidgets by remember { mutableStateOf(widgets.filter { it.widget != HomeWidget.NETWORTH_SUMMARY }) }
+    var reorderableWidgets by remember { mutableStateOf(widgets) }
 
     LaunchedEffect(widgets) {
-        val filtered = widgets.filter { it.widget != HomeWidget.NETWORTH_SUMMARY }
-        if (reorderableWidgets != filtered) {
-             reorderableWidgets = filtered
+        if (reorderableWidgets != widgets) {
+             reorderableWidgets = widgets
         }
     }
 
@@ -145,7 +143,7 @@ private fun WidgetItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         PreferenceSwitch(
-            title = widgetModel.widget.displayName,
+            title = stringResource(widgetModel.widget.labelRes),
             checked = widgetModel.isVisible,
             onCheckedChange = onToggleVisibility,
             leadingIcon = {
