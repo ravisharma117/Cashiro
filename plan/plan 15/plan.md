@@ -92,3 +92,17 @@ Code: `$APP/data/repository/LendBorrowRepository.kt`, `$APP/domain/usecase/LendB
 
 - Confidence threshold and whether low-confidence matches appear silently in the pending list without a notification (recommended: yes).
 - Whether to read device contacts to improve matching. Recommended: no; aliases are enough and avoid a new permission.
+
+## Outcome (2026-10-08)
+
+Built without Plans 10 and 14, so detection is called after a transaction is saved from a new SMS, an SMS scan, or a manual entry (not for imports or recurring or bill payments, and only for the last 3 days). Decisions: strong matches may notify but notifications are off until the user turns them on; weaker matches only wait in the pending list; contacts are read, but only on request.
+
+- Database version 65: `repayment_suggestions` (one row per transaction, so an ignored one never returns), `aliases` on persons, reminder marks on entries.
+- `NameMatcher`, `PhoneNumbers`, `LedgerBuilder`, `RepaymentMatcher` (plain Kotlin): exact, reordered, extra-word, initial and single-word names, saved aliases, phone numbers, UPI addresses. The amount only nudges the score (equal to what is owed up, more than owed down). Direction must fit. Two near-equal candidates are never "strong". Nothing is ever settled without Confirm.
+- Lend/Borrow screen: a "Possible repayments" section with Confirm, Ignore and "Someone else". Confirm adds a settlement entry linked to the transaction; the name as written is remembered as an alias when it differs. Notification buttons do the same.
+- Reminders: 3 days before, on the day and once when overdue, for unsettled entries with a due date, not for people who have repaid in full or are archived. Same exact alarm as recurring transactions and bills.
+- Settings, Notifications, "Lending and borrowing": three switches, all off by default: due-date reminders, possible repayment alerts, use my contacts (asks for the contacts permission; one number at a time; names never stored or logged). PRIVACY.md updated.
+- Editing a person no longer wipes learned names (and keeps the created date).
+- Backups: aliases travel with persons; pending suggestions are included for full exports and restored on a replace import.
+- Not done: per-entry reminder days and notes, an alias editor on the person sheet, banners on transaction detail, `Assign` offering open entries (it picks the person only). Transactions confirmed as repayments stay ordinary income or expense in analytics, as loan entries do today.
+- 48 new tests. Not yet checked on a phone.

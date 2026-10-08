@@ -106,6 +106,9 @@ fun NotificationScreen(
     val alertTimeMinutes by notificationViewModel.scanNewTransactionsAlertTime.collectAsStateWithLifecycle()
     val upcomingEnabled by notificationViewModel.upcomingNotificationsEnabled.collectAsStateWithLifecycle()
     val subscriptions by notificationViewModel.subscriptions.collectAsStateWithLifecycle()
+    val lendReminders by notificationViewModel.lendRemindersEnabled.collectAsStateWithLifecycle()
+    val repaymentNotifications by notificationViewModel.repaymentNotificationsEnabled.collectAsStateWithLifecycle()
+    val useContacts by notificationViewModel.repaymentUseContacts.collectAsStateWithLifecycle()
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val scrollBehaviorSmall = TopAppBarDefaults.pinnedScrollBehavior()
@@ -445,6 +448,59 @@ fun NotificationScreen(
                             padding = PaddingValues(0.dp)
                         )
                     }
+                }
+
+                // Lending & borrowing: everything here is off until the user turns it on
+                SectionHeader(title = stringResource(R.string.lend_settings_section), modifier = Modifier.padding(start = Spacing.md))
+                val contactsPermission = androidx.compose.ui.platform.LocalContext.current
+                var hasContactsPermission by remember {
+                    mutableStateOf(
+                        androidx.core.content.ContextCompat.checkSelfPermission(
+                            contactsPermission, android.Manifest.permission.READ_CONTACTS
+                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                    )
+                }
+                val contactsLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+                    androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+                ) { granted ->
+                    hasContactsPermission = granted
+                    notificationViewModel.setRepaymentUseContacts(granted)
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(1.5.dp)
+                ) {
+                    PreferenceSwitch(
+                        title = stringResource(R.string.lend_reminders_title),
+                        subtitle = stringResource(R.string.lend_reminders_desc),
+                        checked = lendReminders,
+                        onCheckedChange = notificationViewModel::setLendRemindersEnabled,
+                        isFirst = true,
+                        padding = PaddingValues(0.dp)
+                    )
+                    PreferenceSwitch(
+                        title = stringResource(R.string.repayment_notifications_title),
+                        subtitle = stringResource(R.string.repayment_notifications_desc),
+                        checked = repaymentNotifications,
+                        onCheckedChange = notificationViewModel::setRepaymentNotificationsEnabled,
+                        padding = PaddingValues(0.dp)
+                    )
+                    PreferenceSwitch(
+                        title = stringResource(R.string.repayment_contacts_title),
+                        subtitle = stringResource(R.string.repayment_contacts_desc),
+                        checked = useContacts && hasContactsPermission,
+                        onCheckedChange = { wanted ->
+                            if (!wanted) {
+                                notificationViewModel.setRepaymentUseContacts(false)
+                            } else if (hasContactsPermission) {
+                                notificationViewModel.setRepaymentUseContacts(true)
+                            } else {
+                                contactsLauncher.launch(android.Manifest.permission.READ_CONTACTS)
+                            }
+                        },
+                        isLast = true,
+                        padding = PaddingValues(0.dp)
+                    )
                 }
 
                 // Upcoming Settings

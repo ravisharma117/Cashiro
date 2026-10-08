@@ -24,11 +24,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import javax.inject.Inject
+
+/** A pending repayment suggestion, with the person's name for display. */
+data class RepaymentSuggestionItem(
+    val id: Long,
+    val personId: Long,
+    val personName: String,
+    val amount: BigDecimal,
+    val currency: String,
+    val isIncoming: Boolean,
+    val confidence: Int,
+    val matchedText: String?
+) {
+    val isStrong: Boolean get() = confidence >= com.ritesh.cashiro.domain.service.RepaymentMatcher.STRONG
+}
 
 data class LendBorrowUiState(
     val summary: LendBorrowSummary = LendBorrowSummary(),
@@ -68,6 +83,7 @@ class LendBorrowViewModel @Inject constructor(
     private val accountOrderUseCase: AccountOrderUseCase,
     private val categoryRepository: CategoryRepository,
     val attachmentService: AttachmentService,
+    private val repaymentService: com.ritesh.cashiro.domain.service.RepaymentService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -77,6 +93,36 @@ class LendBorrowViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(LendBorrowUiState(selectedFilter = initialFilter))
     val uiState: StateFlow<LendBorrowUiState> = _uiState.asStateFlow()
+
+    /** Payments that may be repayments, waiting for the user. */
+    val suggestions: StateFlow<List<RepaymentSuggestionItem>> = combine(
+        repaymentService.observePending(),
+        getPersonsUseCase()
+    ) { pending, persons ->
+        val names = persons.associate { it.id to it.name }
+        pending.mapNotNull { suggestion ->
+            names[suggestion.personId]?.let { name ->
+                RepaymentSuggestionItem(
+                    id = suggestion.id,
+                    personId = suggestion.personId,
+                    personName = name,
+                    amount = suggestion.amount,
+                    currency = suggestion.currency,
+                    isIncoming = suggestion.isIncoming,
+                    confidence = suggestion.confidence,
+                    matchedText = suggestion.matchedText
+                )
+            }
+        }
+    }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun confirmRepayment(suggestionId: Long, personId: Long? = null) {
+        viewModelScope.launch { repaymentService.confirm(suggestionId, personId) }
+    }
+
+    fun ignoreRepayment(suggestionId: Long) {
+        viewModelScope.launch { repaymentService.ignore(suggestionId) }
+    }
 
     init {
         viewModelScope.launch {

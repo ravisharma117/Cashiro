@@ -28,7 +28,8 @@ class SmsTransactionProcessor @Inject constructor(
     private val subscriptionRepository: SubscriptionRepository,
     private val ruleRepository: RuleRepository,
     private val ruleEngine: RuleEngine,
-    private val balanceUpdateProcessor: BalanceUpdateProcessor
+    private val balanceUpdateProcessor: BalanceUpdateProcessor,
+    private val repaymentService: com.ritesh.cashiro.domain.service.RepaymentService
 ) {
     companion object {
         private const val TAG = "SmsTransactionProcessor"
@@ -200,6 +201,7 @@ class SmsTransactionProcessor @Inject constructor(
                 if (matchedSubscription != null && settledDueDate != null) {
                     subscriptionRepository.linkPaymentTransaction(matchedSubscription.id, settledDueDate, rowId)
                 }
+                repaymentService.onTransactionSaved(rowId, finalEntityForInsert)
                 Log.d(TAG, "Saved new transaction with ID: $rowId${if (finalEntityForInsert.isRecurring) " (Recurring)" else ""}")
 
                 // Save rule applications if any rules were applied

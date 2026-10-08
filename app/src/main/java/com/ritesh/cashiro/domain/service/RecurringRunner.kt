@@ -1,5 +1,6 @@
 package com.ritesh.cashiro.domain.service
 
+import com.ritesh.cashiro.data.database.dao.LendBorrowDao
 import com.ritesh.cashiro.data.database.dao.RecurringTransactionDao
 import com.ritesh.cashiro.data.database.dao.SubscriptionDao
 import com.ritesh.cashiro.data.preferences.UserPreferencesRepository
@@ -29,12 +30,14 @@ class RecurringRunner @Inject constructor(
     private val notifier: RecurringNotifier,
     private val scheduler: RecurringAlarmScheduler,
     private val subscriptionDao: SubscriptionDao,
+    private val lendDao: LendBorrowDao,
     private val subscriptions: SubscriptionRepository,
     private val preferences: UserPreferencesRepository
 ) {
     private val mutex = Mutex()
     private val processor = RecurringProcessor(dao, ::createTransaction)
     private val billReminders = BillReminderProcessor(subscriptionDao)
+    private val lendReminders = LendReminderProcessor(lendDao)
 
     suspend fun run(now: LocalDateTime = LocalDateTime.now()) = mutex.withLock {
         val result = processor.process(now)
@@ -44,6 +47,7 @@ class RecurringRunner @Inject constructor(
         val disabled = preferences.disabledSubscriptionNotificationIds.first()
             .mapNotNull { it.toLongOrNull() }.toSet()
         notifier.showBills(billReminders.process(now, enabled, disabled))
+        notifier.showLendReminders(lendReminders.process(now, preferences.lendRemindersEnabled.first()))
 
         scheduler.reschedule(now)
     }

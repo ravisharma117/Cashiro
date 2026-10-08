@@ -8,7 +8,12 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.ritesh.cashiro.MainActivity
 import com.ritesh.cashiro.R
+import com.ritesh.cashiro.data.database.entity.LendBorrowType
+import com.ritesh.cashiro.data.database.entity.RepaymentSuggestionEntity
 import com.ritesh.cashiro.domain.service.BillReminder
+import com.ritesh.cashiro.domain.service.LendReminder
+import com.ritesh.cashiro.domain.service.LendReminderStage
+import com.ritesh.cashiro.receiver.RepaymentActionReceiver
 import com.ritesh.cashiro.domain.service.RecurringEvent
 import com.ritesh.cashiro.domain.service.RecurringResult
 import com.ritesh.cashiro.receiver.RecurringActionReceiver
@@ -57,6 +62,69 @@ class RecurringNotifier @Inject constructor(
                 channelId = BILLS_CHANNEL_ID
             )
         }
+    }
+
+    fun showRepayment(suggestion: RepaymentSuggestionEntity, personName: String) {
+        post(
+            id = REPAYMENT_NOTIFICATION_BASE + (suggestion.id.toInt() and 0xFFFFFF),
+            title = context.getString(
+                if (suggestion.isIncoming) R.string.repayment_notif_title_from else R.string.repayment_notif_title_to,
+                personName
+            ),
+            text = context.getString(
+                R.string.repayment_notif_text,
+                CurrencyFormatter.formatCurrency(suggestion.amount, suggestion.currency)
+            ),
+            actions = listOf(
+                repaymentAction(R.string.repayment_action_confirm, RepaymentActionReceiver.ACTION_CONFIRM, suggestion.id),
+                repaymentAction(R.string.repayment_action_ignore, RepaymentActionReceiver.ACTION_IGNORE, suggestion.id)
+            ),
+            channelId = LEND_CHANNEL_ID
+        )
+    }
+
+    fun dismissRepayment(suggestionId: Long) {
+        manager.cancel(REPAYMENT_NOTIFICATION_BASE + (suggestionId.toInt() and 0xFFFFFF))
+    }
+
+    fun showLendReminders(reminders: List<LendReminder>) {
+        reminders.forEach { reminder ->
+            val entry = reminder.entry
+            val title = context.getString(
+                when (reminder.stage) {
+                    LendReminderStage.BEFORE -> R.string.lend_notif_before_title
+                    LendReminderStage.DUE -> R.string.lend_notif_due_title
+                    LendReminderStage.OVERDUE -> R.string.lend_notif_overdue_title
+                },
+                reminder.personName
+            )
+            val amount = CurrencyFormatter.formatCurrency(entry.amount, entry.currency)
+            val date = reminder.dueDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+            post(
+                id = LEND_NOTIFICATION_BASE + (entry.id.toInt() and 0xFFFFFF),
+                title = title,
+                text = context.getString(
+                    if (entry.type == LendBorrowType.LENT) R.string.lend_notif_owed_text else R.string.lend_notif_owe_text,
+                    amount,
+                    date
+                ),
+                channelId = LEND_CHANNEL_ID
+            )
+        }
+    }
+
+    private fun repaymentAction(label: Int, action: String, suggestionId: Long): NotificationCompat.Action {
+        val intent = Intent(context, RepaymentActionReceiver::class.java).apply {
+            this.action = action
+            putExtra(RepaymentActionReceiver.EXTRA_ID, suggestionId)
+        }
+        val pending = PendingIntent.getBroadcast(
+            context,
+            (suggestionId.toInt() and 0xFFFFFF) * 2 + (if (action == RepaymentActionReceiver.ACTION_CONFIRM) 0 else 1),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        return NotificationCompat.Action.Builder(0, context.getString(label), pending).build()
     }
 
     /** Clears a due-date notification once the user answered it. */
@@ -162,6 +230,13 @@ class RecurringNotifier @Inject constructor(
                 NotificationManager.IMPORTANCE_DEFAULT
             )
         )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                LEND_CHANNEL_ID,
+                context.getString(R.string.lend_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+        )
     }
 
     /** Stable per schedule and date, even numbers only, so reminders can use the odd one next to it. */
@@ -171,6 +246,9 @@ class RecurringNotifier @Inject constructor(
     companion object {
         const val CHANNEL_ID = "recurring_transactions"
         const val BILLS_CHANNEL_ID = "bill_reminders"
+        const val LEND_CHANNEL_ID = "lend_borrow"
+        private const val REPAYMENT_NOTIFICATION_BASE = 1_600_000_000
+        private const val LEND_NOTIFICATION_BASE = 1_700_000_000
         private const val BILL_NOTIFICATION_BASE = 1_500_000_000
     }
 }

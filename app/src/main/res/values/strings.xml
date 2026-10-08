@@ -1550,4 +1550,30 @@
     <string name="home_savings_rate">%1$s%% saved</string>
     <plurals name="home_upcoming_payments_count"><item quantity="one">%d upcoming payment</item><item quantity="other">%d upcoming payments</item></plurals>
     <string name="home_upcoming_overdue">%1$d overdue</string>
+    <string name="lend_channel_name">Lending and borrowing</string>
+    <string name="repayment_notif_title_from">Possible repayment from %1$s</string>
+    <string name="repayment_notif_title_to">Possible payment back to %1$s</string>
+    <string name="repayment_notif_text">%1$s. Confirm to update the balance.</string>
+    <string name="repayment_action_confirm">Confirm</string>
+    <string name="repayment_action_ignore">Ignore</string>
+    <string name="lend_notif_before_title">%1$s: payment due soon</string>
+    <string name="lend_notif_due_title">%1$s: payment due today</string>
+    <string name="lend_notif_overdue_title">%1$s: payment overdue</string>
+    <string name="lend_notif_owed_text">They owe you %1$s · due %2$s</string>
+    <string name="lend_notif_owe_text">You owe %1$s · due %2$s</string>
+    <string name="repayment_pending_title">Possible repayments</string>
+    <string name="repayment_card_from">%1$s may have paid you back %2$s</string>
+    <string name="repayment_card_to">You may have paid %1$s back %2$s</string>
+    <string name="repayment_confidence_strong">Strong match</string>
+    <string name="repayment_confidence_weak">Possible match</string>
+    <string name="repayment_matched_on">matched on %1$s</string>
+    <string name="repayment_action_assign">Someone else</string>
+    <string name="repayment_assign_title">Who is this with?</string>
+    <string name="lend_settings_section">Lending and borrowing</string>
+    <string name="lend_reminders_title">Due-date reminders</string>
+    <string name="lend_reminders_desc">Remind me 3 days before, on the day, and when a payment is overdue</string>
+    <string name="repayment_notifications_title">Possible repayment alerts</string>
+    <string name="repayment_notifications_desc">Notify me when a payment looks like a repayment. Off: they only wait on the Lending screen</string>
+    <string name="repayment_contacts_title">Use my contacts</string>
+    <string name="repayment_contacts_desc">Recognise who paid from a phone number, one number at a time. Names are never stored</string>
 </resources>

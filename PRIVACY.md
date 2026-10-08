@@ -60,9 +60,15 @@ If you choose to add a **recovery email**, so that a forgotten PIN can be reset,
 - **After Model Download**: AI works completely offline, no internet required for core features
 - **Your Data**: Never transmitted over the internet, all processing remains on-device
 
+### Contacts Permission (Optional, Off by Default)
+- **Purpose**: If you switch on contact matching under Lending & Borrowing, the app can look up the name of a contact from a phone number that appears in a payment, to recognise who paid you back
+- **How it is used**: One number at a time, only when a new payment contains a phone number and you have saved people in Lending & Borrowing
+- **Never stored**: The contact name is used for the comparison and then dropped. Your contact list is never read in bulk, copied, logged or sent anywhere
+- **Your control**: The app works fully without it; deny or revoke the permission at any time
+
 ### No Other Permissions Required
 - No location tracking
-- No contact access
+- No other contact access
 - No camera or microphone access
 
 ## Third-Party Services

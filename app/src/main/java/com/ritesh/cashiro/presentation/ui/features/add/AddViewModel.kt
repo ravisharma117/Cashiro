@@ -54,6 +54,7 @@ constructor(
     private val subscriptionRepository: SubscriptionRepository,
     private val updateSubscriptionUseCase: UpdateSubscriptionUseCase,
     private val billRecurringLink: com.ritesh.cashiro.domain.usecase.BillRecurringLinkUseCase,
+    private val repaymentService: com.ritesh.cashiro.domain.service.RepaymentService,
     private val currencyRepository: CurrencyRepository,
     val attachmentService: AttachmentService,
     @ApplicationContext private val context: Context
@@ -340,6 +341,9 @@ constructor(
                     targetAccountLast4 = state.targetAccount?.accountLast4,
                     attachments = attachmentService.joinAttachments(_transactionAttachments.value)
                 )
+
+                // A transaction the user did not tag as a loan may still be a repayment
+                if (!isLoanType) repaymentService.onTransactionSaved(transactionId)
 
                 if (isLoanType && state.selectedPersonId != null) {
                     val selectedPerson = persons.value.find { it.id == state.selectedPersonId }

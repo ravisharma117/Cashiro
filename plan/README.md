@@ -24,7 +24,7 @@ In every plan, `$APP` means `app/src/main/java/com/ritesh/cashiro`.
 | 12 | [Bills & subscriptions](plan%2012/plan.md) | 18 | 11 | `feature/bills` | ◐ built, device check open |
 | 13 | [CSV import wizard](plan%2013/plan.md) | 12 | 10 | `feature/csv-import` | skipped (not selected) |
 | 14 | [UPI accessibility capture](plan%2014/plan.md) | 13 | 10 | `feature/upi-accessibility` | skipped (not selected) |
-| 15 | [Lending reminders & repayment detection](plan%2015/plan.md) | 15 | 10, 14 | `feature/lending-borrowing` | ☐ |
+| 15 | [Lending reminders & repayment detection](plan%2015/plan.md) | 15 | 10, 14 | `feature/lending-borrowing` | ◐ built, device check open |
 | 16 | [Startup navigator](plan%2016/plan.md) | 5 | 3, 5, 14 | `feature/startup-navigator` | skipped (not selected) |
 | 17 | [Savings goals](plan%2017/plan.md) | 19 | 9 | `feature/savings-goals` | skipped (not selected) |
 | 18 | [Net worth](plan%2018/plan.md) | 20 | 3, 17 | `feature/net-worth` | ☐ |

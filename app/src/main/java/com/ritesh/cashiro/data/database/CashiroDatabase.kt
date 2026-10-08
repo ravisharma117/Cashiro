@@ -86,9 +86,10 @@ import com.ritesh.cashiro.data.database.entity.WebhookProfileEntity
             com.ritesh.cashiro.data.database.entity.LendBorrowTransactionEntity::class,
             com.ritesh.cashiro.data.database.entity.RecurringTransactionEntity::class,
             com.ritesh.cashiro.data.database.entity.RecurringOccurrenceEntity::class,
-            com.ritesh.cashiro.data.database.entity.BillPaymentEntity::class
+            com.ritesh.cashiro.data.database.entity.BillPaymentEntity::class,
+            com.ritesh.cashiro.data.database.entity.RepaymentSuggestionEntity::class
         ],
-        version = 64,
+        version = 65,
     exportSchema = true,
     autoMigrations =
         [
@@ -138,6 +139,7 @@ abstract class CashiroDatabase : RoomDatabase() {
     abstract fun lendBorrowDao(): com.ritesh.cashiro.data.database.dao.LendBorrowDao
     abstract fun recurringTransactionDao(): com.ritesh.cashiro.data.database.dao.RecurringTransactionDao
     abstract fun billPaymentDao(): com.ritesh.cashiro.data.database.dao.BillPaymentDao
+    abstract fun repaymentSuggestionDao(): com.ritesh.cashiro.data.database.dao.RepaymentSuggestionDao
 
     companion object {
         const val DATABASE_NAME = "pennywise_database"
@@ -672,6 +674,21 @@ MIGRATION_55_56,
                         )
                         """.trimIndent()
                     )
+                }
+            }
+
+        val MIGRATION_64_65 =
+            object : Migration(64, 65) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    // Lending reminders, saved names and repayment suggestions (copied from the exported schema 65)
+                    db.execSQL("ALTER TABLE `lend_borrow_transactions` ADD COLUMN `pre_reminded_for` TEXT")
+                    db.execSQL("ALTER TABLE `lend_borrow_transactions` ADD COLUMN `due_reminded_for` TEXT")
+                    db.execSQL("ALTER TABLE `lend_borrow_transactions` ADD COLUMN `overdue_reminded_for` TEXT")
+                    db.execSQL("ALTER TABLE `lend_borrow_persons` ADD COLUMN `aliases` TEXT NOT NULL DEFAULT '[]'")
+                    db.execSQL("CREATE TABLE IF NOT EXISTS `repayment_suggestions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `transaction_id` INTEGER NOT NULL, `person_id` INTEGER NOT NULL, `entry_id` INTEGER, `amount` TEXT NOT NULL, `currency` TEXT NOT NULL DEFAULT 'INR', `is_incoming` INTEGER NOT NULL DEFAULT 1, `confidence` INTEGER NOT NULL, `matched_text` TEXT, `status` TEXT NOT NULL, `created_at` TEXT NOT NULL, `updated_at` TEXT NOT NULL, FOREIGN KEY(`person_id`) REFERENCES `lend_borrow_persons`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                    db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_repayment_suggestions_transaction_id` ON `repayment_suggestions` (`transaction_id`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_repayment_suggestions_person_id` ON `repayment_suggestions` (`person_id`)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS `index_repayment_suggestions_status` ON `repayment_suggestions` (`status`)")
                 }
             }
 

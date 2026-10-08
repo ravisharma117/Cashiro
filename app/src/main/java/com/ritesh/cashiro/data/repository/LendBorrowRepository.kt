@@ -221,6 +221,9 @@ class LendBorrowRepository @Inject constructor(
     }
 
     /** Resolves the display name of a person for UI, if the person still exists. */
+    suspend fun getPersonEntity(personId: Long): LendBorrowPersonEntity? =
+        lendBorrowDao.getPersonByIdSync(personId)
+
     suspend fun getPersonName(personId: Long): String? =
         lendBorrowDao.getPersonByIdSync(personId)?.name
 

@@ -18,7 +18,8 @@ import javax.inject.Inject
 class NotificationViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val notificationScheduler: NotificationScheduler,
-    subscriptionRepository: SubscriptionRepository
+    subscriptionRepository: SubscriptionRepository,
+    private val recurringAlarmScheduler: com.ritesh.cashiro.data.manager.RecurringAlarmScheduler
 ) : ViewModel() {
 
     val scanNewTransactionsEnabled: StateFlow<Boolean> = userPreferencesRepository.scanNewTransactionsEnabled
@@ -29,6 +30,15 @@ class NotificationViewModel @Inject constructor(
 
     val upcomingNotificationsEnabled: StateFlow<Boolean> = userPreferencesRepository.upcomingNotificationsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val lendRemindersEnabled: StateFlow<Boolean> = userPreferencesRepository.lendRemindersEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val repaymentNotificationsEnabled: StateFlow<Boolean> = userPreferencesRepository.repaymentNotificationsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val repaymentUseContacts: StateFlow<Boolean> = userPreferencesRepository.repaymentUseContacts
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     // Combine active subscriptions with disabled notification IDs
     val subscriptions: StateFlow<List<SubscriptionNotificationState>> = combine(
@@ -61,7 +71,24 @@ class NotificationViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferencesRepository.setUpcomingNotificationsEnabled(enabled)
             notificationScheduler.scheduleDailyReminder()
+            recurringAlarmScheduler.reschedule()
         }
+    }
+
+    fun setLendRemindersEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.setLendRemindersEnabled(enabled)
+            // The exact alarm also wakes for lending due dates, so it has to look again
+            recurringAlarmScheduler.reschedule()
+        }
+    }
+
+    fun setRepaymentNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch { userPreferencesRepository.setRepaymentNotificationsEnabled(enabled) }
+    }
+
+    fun setRepaymentUseContacts(enabled: Boolean) {
+        viewModelScope.launch { userPreferencesRepository.setRepaymentUseContacts(enabled) }
     }
 
     fun toggleSubscriptionNotification(id: Long, enabled: Boolean) {

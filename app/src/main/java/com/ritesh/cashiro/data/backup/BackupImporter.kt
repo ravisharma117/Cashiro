@@ -184,6 +184,7 @@ class BackupImporter @Inject constructor(
                 database.merchantMappingDao().deleteAllMappings()
                 database.unrecognizedSmsDao().deleteAll()
                 database.chatDao().deleteAllMessages()
+                database.repaymentSuggestionDao().deleteAll()
                 database.recurringTransactionDao().deleteAllOccurrences()
                 database.recurringTransactionDao().deleteAll()
                 database.budgetDao().deleteAllBudgets()
@@ -267,6 +268,12 @@ class BackupImporter @Inject constructor(
                 backup.database.lendBorrowTransactions.forEach { tx ->
                     database.lendBorrowDao().insertTransaction(tx)
                 }
+
+                // Pending suggestions whose person came back with the backup
+                val restoredPersonIds = backup.database.lendBorrowPersons.map { it.id }.toSet()
+                database.repaymentSuggestionDao().insertAll(
+                    backup.database.repaymentSuggestions.filter { it.personId in restoredPersonIds }
+                )
 
                 // Only payments whose subscription is in the backup (a payment needs its subscription)
                 val restoredSubscriptionIds = backup.database.subscriptions.map { it.id }.toSet()
