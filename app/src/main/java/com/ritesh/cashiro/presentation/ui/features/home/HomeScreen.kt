@@ -167,6 +167,8 @@ fun SharedTransitionScope.HomeScreen(
     onNavigateToBudgets: (Long?) -> Unit = {},
     onNavigateToBudgetHistory: (Long) -> Unit = {},
     onNavigateToLendBorrow: (String?) -> Unit = { _ -> },
+    onNavigateToAnalytics: () -> Unit = {},
+    onNavigateToRecurring: () -> Unit = {},
     onTransactionClick: (Long, String) -> Unit = { _, _ -> },
     onFullResyncClick: () -> Unit = {},
     animatedContentScope: AnimatedContentScope? = null,
@@ -447,6 +449,28 @@ fun SharedTransitionScope.HomeScreen(
                                     )
                                 }
                             }
+                            HomeWidget.MONTHLY_SUMMARY -> {
+                                item(key = "monthly_summary") {
+                                    MonthlySummaryCard(
+                                        income = uiState.currentMonthIncome,
+                                        expenses = uiState.currentMonthExpenses,
+                                        currency = uiState.selectedCurrency,
+                                        onClick = onNavigateToAnalytics,
+                                        modifier = Modifier.padding(horizontal = Dimensions.Padding.content)
+                                    )
+                                }
+                            }
+                            HomeWidget.RECURRING -> {
+                                if (uiState.upcomingRecurring.isNotEmpty()) {
+                                    item(key = "recurring") {
+                                        RecurringHomeCard(
+                                            items = uiState.upcomingRecurring,
+                                            onClick = onNavigateToRecurring,
+                                            modifier = Modifier.padding(horizontal = Dimensions.Padding.content)
+                                        )
+                                    }
+                                }
+                            }
                             HomeWidget.LOANS -> {
                                 item(key = "loans") {
                                     LendBorrowCard(
@@ -532,6 +556,7 @@ fun SharedTransitionScope.HomeScreen(
                                             UpcomingSubscriptionsCard(
                                                 subscriptions = uiState.upcomingSubscriptions,
                                                 totalAmount = uiState.upcomingSubscriptionsTotal,
+                                                overdueCount = uiState.upcomingOverdueCount,
                                                 currency = uiState.upcomingSubscriptionsCurrency,
                                                 categoriesMap = categoriesMap,
                                                 subcategoriesMap = subcategoriesMap,
@@ -559,6 +584,7 @@ fun SharedTransitionScope.HomeScreen(
                                             UpcomingSubscriptionsCard(
                                                 subscriptions = uiState.upcomingSubscriptions,
                                                 totalAmount = uiState.upcomingSubscriptionsTotal,
+                                                overdueCount = uiState.upcomingOverdueCount,
                                                 currency = uiState.upcomingSubscriptionsCurrency,
                                                 categoriesMap = categoriesMap,
                                                 subcategoriesMap = subcategoriesMap,
@@ -1060,6 +1086,7 @@ private fun UpcomingSubscriptionsCard(
     subscriptions: List<SubscriptionEntity>,
     totalAmount: BigDecimal,
     currency: String,
+    overdueCount: Int = 0,
     categoriesMap: Map<String, CategoryEntity> = emptyMap(),
     subcategoriesMap: Map<String, SubcategoryEntity> = emptyMap(),
     onClick: () -> Unit = {},
@@ -1102,7 +1129,11 @@ private fun UpcomingSubscriptionsCard(
                 modifier = Modifier.padding(start = 12.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.subscriptions_count_format, subscriptions.size),
+                    text = androidx.compose.ui.res.pluralStringResource(
+                        R.plurals.home_upcoming_payments_count,
+                        subscriptions.size,
+                        subscriptions.size
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface.copy(
@@ -1125,7 +1156,8 @@ private fun UpcomingSubscriptionsCard(
                     )
                     Text(
                         text =
-                            stringResource(R.string.per_month).uppercase(),
+                            (if (overdueCount > 0) stringResource(R.string.home_upcoming_overdue, overdueCount)
+                            else stringResource(R.string.upcoming_payments_subtitle)).uppercase(),
                         style = MaterialTheme.typography.bodySmall,
                         fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.Bold,

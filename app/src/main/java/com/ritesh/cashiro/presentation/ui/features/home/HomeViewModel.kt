@@ -71,6 +71,7 @@ class HomeViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val subcategoryRepository: SubcategoryRepository,
     private val budgetRepository: BudgetRepository,
+    private val recurringRepository: com.ritesh.cashiro.data.repository.RecurringTransactionRepository,
     private val lendBorrowRepository: com.ritesh.cashiro.data.repository.LendBorrowRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -147,33 +148,21 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            recurringRepository.observeAll().collect { all ->
+                val next = all
+                    .filter { it.state == com.ritesh.cashiro.data.database.entity.RecurringState.ACTIVE }
+                    .sortedBy { it.nextRunDate }
+                    .take(3)
+                _uiState.update { it.copy(upcomingRecurring = next) }
+            }
+        }
+
+        viewModelScope.launch {
             combine(
                 userPreferencesRepository.homeWidgetsOrder,
                 userPreferencesRepository.hiddenHomeWidgets
             ) { order, hidden ->
-                val allWidgets = HomeWidget.entries.toMutableList()
-                
-                // Construct the final list based on saved order
-                val orderedWidgets = mutableListOf<HomeWidgetUiModel>()
-                
-                // Net Worth (Always first)
-                orderedWidgets.add(HomeWidgetUiModel(HomeWidget.NETWORTH_SUMMARY, true))
-                
-                //ordered widgets
-                order.forEach { widget ->
-                     if (widget != HomeWidget.NETWORTH_SUMMARY) { // Prevent duplicates just in case
-                         orderedWidgets.add(HomeWidgetUiModel(widget, !hidden.contains(widget)))
-                         allWidgets.remove(widget)
-                     }
-                }
-                allWidgets.remove(HomeWidget.NETWORTH_SUMMARY)
-
-                // any remaining widgets (newly added ones in enum)
-                allWidgets.sortedBy { it.defaultOrder }.forEach { widget ->
-                    orderedWidgets.add(HomeWidgetUiModel(widget, !hidden.contains(widget)))
-                }
-                
-                orderedWidgets
+                HomeWidgetLayout.resolve(order, hidden)
             }.collect { widgets ->
                 _homeWidgets.value = widgets
             }
@@ -418,9 +407,9 @@ class HomeViewModel @Inject constructor(
                     currencyConversionService.refreshExchangeRatesForAccount(subscriptionCurrencies + targetCurrency)
                 }
 
-                var totalAmount = BigDecimal.ZERO
-                for (subscription in subscriptions) {
-                    val amt = if (subscription.currency == targetCurrency) {
+                // What is due in the next 30 days plus anything overdue, bills and subscriptions alike
+                val convertedAmounts = subscriptions.associate { subscription ->
+                    subscription.id to if (subscription.currency == targetCurrency) {
                         subscription.amount
                     } else {
                         currencyConversionService.convertAmount(
@@ -429,14 +418,20 @@ class HomeViewModel @Inject constructor(
                             toCurrency = targetCurrency
                         )
                     }
-                    totalAmount = totalAmount.add(amt)
                 }
+                val upcoming = com.ritesh.cashiro.domain.service.UpcomingPaymentsCalculator.build(
+                    subscriptions = subscriptions,
+                    today = java.time.LocalDate.now(),
+                    amountOf = { convertedAmounts[it.id] ?: it.amount }
+                )
 
                 _uiState.update {
                     it.copy(
-                        upcomingSubscriptions = subscriptions,
-                        upcomingSubscriptionsTotal = totalAmount,
-                        upcomingSubscriptionsCurrency = targetCurrency
+                        upcomingSubscriptions = (upcoming.overdue + upcoming.thisWeek + upcoming.later)
+                            .map { item -> item.subscription },
+                        upcomingSubscriptionsTotal = upcoming.total,
+                        upcomingSubscriptionsCurrency = targetCurrency,
+                        upcomingOverdueCount = upcoming.overdue.size
                     )
                 }
             }.collectLatest { }

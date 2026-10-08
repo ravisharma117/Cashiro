@@ -76,3 +76,14 @@ Mapping to the requirement's list:
 
 - Whether Total Balance may be moved or hidden like the other cards. The requirement lists it as selectable; today it is pinned first. Recommended: make it reorderable and hideable.
 - Whether Income, Expenses and Savings are one card (recommended, matches the requirement's example layout) or three separate cards.
+
+## Outcome (2026-10-08)
+
+Built after Plans 11 and 12, with these decisions: Monthly Summary, Recurring and Upcoming Payments cards; Total Balance movable and hideable; every new card visible on upgrade. Top Categories and Savings Goals were not selected.
+
+- New cards: Monthly Summary (income, expenses, savings and savings rate; follows the hide-totals setting; tap opens Analysis) and Recurring (next 3 due; tap opens the Recurring list, hidden while empty).
+- The old Upcoming Subscriptions card is now Upcoming Payments: bills and subscriptions due in the next 30 days plus anything overdue, with the total and an overdue count.
+- Net Worth is a normal card: it can be dragged, hidden, and it is still first by default.
+- Card names come from string resources, so they can be translated.
+- `HomeWidgetLayout.resolve` decides the order: a saved order is kept, and a new card is slotted in after the card that precedes it by default, so an upgrade does not move anything. Unknown saved names are ignored.
+- 9 new tests. Not done: lazy loading of data for hidden cards. Not yet checked on a phone.
