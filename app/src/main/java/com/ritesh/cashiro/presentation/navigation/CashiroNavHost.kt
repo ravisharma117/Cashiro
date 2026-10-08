@@ -68,6 +68,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import com.ritesh.cashiro.presentation.common.TimePeriod
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ritesh.cashiro.data.preferences.NavigationBarStyle
@@ -80,7 +81,9 @@ import com.ritesh.cashiro.presentation.ui.features.analytics.AnalyticsScreen
 import com.ritesh.cashiro.presentation.ui.features.budgets.BudgetDetailScreen
 import com.ritesh.cashiro.presentation.ui.features.budgets.BudgetHistoryScreen
 import com.ritesh.cashiro.presentation.ui.features.budgets.BudgetsScreen
+import com.ritesh.cashiro.presentation.ui.features.categories.CategoriesOverviewScreen
 import com.ritesh.cashiro.presentation.ui.features.categories.CategoriesScreen
+import com.ritesh.cashiro.presentation.ui.features.categories.CategoryDetailScreen
 import com.ritesh.cashiro.presentation.ui.features.chat.ChatScreen
 import com.ritesh.cashiro.presentation.ui.features.contacts.ContactsScreen
 import com.ritesh.cashiro.presentation.ui.features.home.HomeScreen
@@ -262,14 +265,26 @@ fun CashiroNavHost(
                 ) {
                     AnalyticsScreen(
                         onNavigateToTransactions = { category, merchant, period, currency ->
-                            navController.safeNavigate(
-                                Transactions(
-                                    category = category,
-                                    merchant = merchant,
-                                    period = period,
-                                    currency = currency
+                            val month = when (period) {
+                                TimePeriod.THIS_MONTH.name -> java.time.YearMonth.now()
+                                TimePeriod.LAST_MONTH.name -> java.time.YearMonth.now().minusMonths(1)
+                                else -> null
+                            }
+                            if (category != null && merchant == null && month != null) {
+                                // A category tapped for a single month opens its detail view.
+                                navController.safeNavigate(
+                                    CategoryDetail(category, month.year, month.monthValue)
                                 )
-                            )
+                            } else {
+                                navController.safeNavigate(
+                                    Transactions(
+                                        category = category,
+                                        merchant = merchant,
+                                        period = period,
+                                        currency = currency
+                                    )
+                                )
+                            }
                         },
                         animatedContentScope = this@composable,
                         blurEffects = themeUiState.blurEffects,
@@ -495,9 +510,61 @@ fun CashiroNavHost(
                     popEnterTransition = CashiroTransitions.horizontalSlidePopEnter,
                     popExitTransition = CashiroTransitions.horizontalSlidePopExit
                 ) {
+                    CategoriesOverviewScreen(
+                        onNavigateBack = { navController.safePopBackStack() },
+                        onEditCategories = { navController.safeNavigate(ManageCategories) },
+                        onOpenCategory = { name, month ->
+                            navController.safeNavigate(CategoryDetail(name, month.year, month.monthValue))
+                        }
+                    )
+                }
+
+                composable<ManageCategories>(
+                    enterTransition = CashiroTransitions.horizontalSlideEnter,
+                    exitTransition = CashiroTransitions.horizontalSlideExit,
+                    popEnterTransition = CashiroTransitions.horizontalSlidePopEnter,
+                    popExitTransition = CashiroTransitions.horizontalSlidePopExit
+                ) {
                     CategoriesScreen(
                         onNavigateBack = { navController.safePopBackStack() },
                         blurEffects = themeUiState.blurEffects
+                    )
+                }
+
+                composable<CategoryDetail>(
+                    enterTransition = CashiroTransitions.horizontalSlideEnter,
+                    exitTransition = CashiroTransitions.horizontalSlideExit,
+                    popEnterTransition = CashiroTransitions.horizontalSlidePopEnter,
+                    popExitTransition = CashiroTransitions.horizontalSlidePopExit
+                ) { backStackEntry ->
+                    val detail = backStackEntry.toRoute<CategoryDetail>()
+                    CategoryDetailScreen(
+                        categoryName = detail.categoryName,
+                        year = detail.year,
+                        month = detail.month,
+                        onNavigateBack = { navController.safePopBackStack() },
+                        onOpenTransaction = { id ->
+                            navController.safeNavigate(
+                                TransactionDetail(
+                                    transactionId = id,
+                                    sharedElementKey = "transaction_$id"
+                                )
+                            )
+                        },
+                        onSeeAll = { name, month ->
+                            val now = java.time.YearMonth.now()
+                            navController.safeNavigate(
+                                Transactions(
+                                    category = name,
+                                    period = when (month) {
+                                        now -> TimePeriod.THIS_MONTH.name
+                                        now.minusMonths(1) -> TimePeriod.LAST_MONTH.name
+                                        else -> TimePeriod.ALL.name
+                                    }
+                                )
+                            )
+                        },
+                        animatedContentScope = this@composable
                     )
                 }
 
