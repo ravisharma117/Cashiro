@@ -61,7 +61,8 @@ class SmsReaderWorker @AssistedInject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val unrecognizedSmsRepository: UnrecognizedSmsRepository,
     private val ruleRepository: RuleRepository,
-    private val ruleEngine: RuleEngine
+    private val ruleEngine: RuleEngine,
+    private val repaymentService: com.ritesh.cashiro.domain.service.RepaymentService
 ) : CoroutineWorker(appContext, workerParams) {
     
     companion object {
@@ -373,6 +374,7 @@ class SmsReaderWorker @AssistedInject constructor(
                                 if (matchedSubscription != null && settledDueDate != null) {
                                     subscriptionRepository.linkPaymentTransaction(matchedSubscription.id, settledDueDate, rowId)
                                 }
+                                repaymentService.onTransactionSaved(rowId, finalEntityForInsert)
                                 savedCount++
                                 Log.d(TAG, "Saved new transaction with ID: $rowId${if (finalEntityForInsert.isRecurring) " (Recurring)" else ""}")
 

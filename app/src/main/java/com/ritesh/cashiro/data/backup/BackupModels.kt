@@ -155,7 +155,11 @@ data class DatabaseSnapshot(
 
     // Absent in backups made before bills were tracked per cycle
     @SerializedName("bill_payments")
-    val billPayments: List<com.ritesh.cashiro.data.database.entity.BillPaymentEntity> = emptyList()
+    val billPayments: List<com.ritesh.cashiro.data.database.entity.BillPaymentEntity> = emptyList(),
+
+    // Pending repayment suggestions only; settled and ignored ones are history
+    @SerializedName("repayment_suggestions")
+    val repaymentSuggestions: List<com.ritesh.cashiro.data.database.entity.RepaymentSuggestionEntity> = emptyList()
 )
 
 data class WebhookProfileBackup(

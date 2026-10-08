@@ -127,6 +127,7 @@ fun SharedTransitionScope.LendBorrowScreen(
     blurEffects: Boolean = LocalBlurEffects.current
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val repaymentSuggestions by viewModel.suggestions.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val view = LocalView.current
@@ -303,6 +304,18 @@ fun SharedTransitionScope.LendBorrowScreen(
                         currency = uiState.baseCurrency,
                         animatedContentScope = animatedContentScope
                     )
+                }
+
+                if (repaymentSuggestions.isNotEmpty()) {
+                    item(key = "repayment_suggestions") {
+                        RepaymentSuggestionsSection(
+                            suggestions = repaymentSuggestions,
+                            persons = uiState.persons,
+                            onConfirm = { viewModel.confirmRepayment(it) },
+                            onIgnore = { viewModel.ignoreRepayment(it) },
+                            onAssign = { id, personId -> viewModel.confirmRepayment(id, personId) }
+                        )
+                    }
                 }
 
                 item {

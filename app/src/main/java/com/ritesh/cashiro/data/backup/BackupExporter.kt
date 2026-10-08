@@ -236,6 +236,9 @@ class BackupExporter @Inject constructor(
         } else emptyList()
         val recurringOccurrences = if (config.includeTransactionalData) recurringDao.getAllOccurrences() else emptyList()
         val billPayments = if (config.includeTransactionalData) database.billPaymentDao().getAll() else emptyList()
+        val repaymentSuggestions = if (config.includeTransactionalData && config.privacy == ExportPrivacy.FULL) {
+            database.repaymentSuggestionDao().getPending()
+        } else emptyList()
 
         return CashiroBackup(
             metadata = BackupMetadata(
@@ -274,7 +277,8 @@ class BackupExporter @Inject constructor(
                 lendBorrowTransactions = lendBorrowTransactions,
                 recurringTransactions = recurringTransactions,
                 recurringOccurrences = recurringOccurrences,
-                billPayments = billPayments
+                billPayments = billPayments,
+                repaymentSuggestions = repaymentSuggestions
             ),
             preferences = PreferencesSnapshot(
                 theme = ThemePreferences(

@@ -5,10 +5,12 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.ritesh.cashiro.data.database.dao.LendBorrowDao
 import com.ritesh.cashiro.data.database.dao.RecurringTransactionDao
 import com.ritesh.cashiro.data.database.dao.SubscriptionDao
 import com.ritesh.cashiro.data.preferences.UserPreferencesRepository
 import com.ritesh.cashiro.domain.service.BillReminderProcessor
+import com.ritesh.cashiro.domain.service.LendReminderProcessor
 import com.ritesh.cashiro.domain.service.RecurringProcessor
 import com.ritesh.cashiro.receiver.RecurringAlarmReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,6 +29,7 @@ class RecurringAlarmScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dao: RecurringTransactionDao,
     private val subscriptionDao: SubscriptionDao,
+    private val lendDao: LendBorrowDao,
     private val preferences: UserPreferencesRepository
 ) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -37,7 +40,13 @@ class RecurringAlarmScheduler @Inject constructor(
             .mapNotNull { it.toLongOrNull() }.toSet()
         val wake = listOfNotNull(
             RecurringProcessor.nextWake(now, dao.getActive()),
-            BillReminderProcessor.nextWake(now, subscriptionDao.getActiveList(), enabled, disabled)
+            BillReminderProcessor.nextWake(now, subscriptionDao.getActiveList(), enabled, disabled),
+            LendReminderProcessor.nextWake(
+                now,
+                lendDao.getUnsettledWithDueDate(),
+                lendDao.getActivePersonsList().map { it.id }.toSet(),
+                preferences.lendRemindersEnabled.first()
+            )
         ).minOrNull()
         if (wake == null) {
             cancel()

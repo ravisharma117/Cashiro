@@ -20,6 +20,18 @@ interface LendBorrowDao {
     @Query("SELECT * FROM lend_borrow_persons ORDER BY name ASC")
     fun getAllPersons(): Flow<List<LendBorrowPersonEntity>>
 
+    @Query("SELECT * FROM lend_borrow_persons WHERE is_archived = 0 ORDER BY name ASC")
+    suspend fun getActivePersonsList(): List<LendBorrowPersonEntity>
+
+    @Query("SELECT * FROM lend_borrow_transactions ORDER BY date DESC")
+    suspend fun getAllTransactionsList(): List<LendBorrowTransactionEntity>
+
+    @Query("SELECT * FROM lend_borrow_transactions WHERE is_settled = 0 AND due_date IS NOT NULL")
+    suspend fun getUnsettledWithDueDate(): List<LendBorrowTransactionEntity>
+
+    @Query("UPDATE lend_borrow_transactions SET pre_reminded_for = :pre, due_reminded_for = :due, overdue_reminded_for = :overdue WHERE id = :id")
+    suspend fun updateReminderMarks(id: Long, pre: java.time.LocalDate?, due: java.time.LocalDate?, overdue: java.time.LocalDate?)
+
     @Query("SELECT * FROM lend_borrow_persons WHERE id = :id")
     fun getPersonById(id: Long): Flow<LendBorrowPersonEntity?>
 

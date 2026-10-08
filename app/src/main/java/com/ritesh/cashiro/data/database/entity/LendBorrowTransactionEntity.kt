@@ -78,7 +78,17 @@ data class LendBorrowTransactionEntity(
     val merchant: String? = null,
 
     @ColumnInfo(name = "attachments", defaultValue = "'[]'")
-    val attachments: List<String> = emptyList()
+    val attachments: List<String> = emptyList(),
+
+    // Due dates the reminders were already sent for, so each stage goes out once per due date
+    @ColumnInfo(name = "pre_reminded_for")
+    val preRemindedFor: java.time.LocalDate? = null,
+
+    @ColumnInfo(name = "due_reminded_for")
+    val dueRemindedFor: java.time.LocalDate? = null,
+
+    @ColumnInfo(name = "overdue_reminded_for")
+    val overdueRemindedFor: java.time.LocalDate? = null
 )
 
 enum class LendBorrowType {

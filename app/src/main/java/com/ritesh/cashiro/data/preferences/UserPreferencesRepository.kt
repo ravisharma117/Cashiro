@@ -92,6 +92,9 @@ constructor(@ApplicationContext private val context: Context) {
         val SECURE_WINDOW_ENABLED = booleanPreferencesKey("secure_window_enabled")
         val HIDE_TOTAL_AMOUNTS = booleanPreferencesKey("hide_total_amounts")
         val REVEAL_ON_PROXIMITY = booleanPreferencesKey("reveal_on_proximity")
+        val LEND_REMINDERS_ENABLED = booleanPreferencesKey("lend_reminders_enabled")
+        val REPAYMENT_NOTIFICATIONS_ENABLED = booleanPreferencesKey("repayment_notifications_enabled")
+        val REPAYMENT_USE_CONTACTS = booleanPreferencesKey("repayment_use_contacts")
         val HIDE_NAVIGATION_LABELS = booleanPreferencesKey("hide_navigation_labels")
         val HIDE_PILL_INDICATOR = booleanPreferencesKey("hide_pill_indicator")
         val BLUR_EFFECTS = booleanPreferencesKey("blur_effects")
@@ -635,6 +638,30 @@ constructor(@ApplicationContext private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.APP_LOCK_BIOMETRIC_ENABLED] = enabled
         }
+    }
+
+    /** Due-date reminders for money lent or borrowed. Off until the user turns them on. */
+    val lendRemindersEnabled: Flow<Boolean> =
+            context.dataStore.data.map { it[PreferencesKeys.LEND_REMINDERS_ENABLED] ?: false }
+
+    suspend fun setLendRemindersEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.LEND_REMINDERS_ENABLED] = enabled }
+    }
+
+    /** Notifications for strong possible-repayment matches. Off until the user turns them on. */
+    val repaymentNotificationsEnabled: Flow<Boolean> =
+            context.dataStore.data.map { it[PreferencesKeys.REPAYMENT_NOTIFICATIONS_ENABLED] ?: false }
+
+    suspend fun setRepaymentNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.REPAYMENT_NOTIFICATIONS_ENABLED] = enabled }
+    }
+
+    /** Look up contact names from phone numbers to recognise repayments. Off until turned on. */
+    val repaymentUseContacts: Flow<Boolean> =
+            context.dataStore.data.map { it[PreferencesKeys.REPAYMENT_USE_CONTACTS] ?: false }
+
+    suspend fun setRepaymentUseContacts(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.REPAYMENT_USE_CONTACTS] = enabled }
     }
 
     /** Shows balances and totals masked until revealed. Off by default. */

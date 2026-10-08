@@ -64,6 +64,8 @@ class AddEditLendBorrowPersonUseCase @Inject constructor(
         category: PersonCategory? = null,
         isArchived: Boolean = false
     ) {
+        // Editing the details must not wipe the names learned from confirmed repayments
+        val existing = repository.getPersonEntity(id)
         val entity = LendBorrowPersonEntity(
             id = id,
             name = name.trim(),
@@ -72,7 +74,9 @@ class AddEditLendBorrowPersonUseCase @Inject constructor(
             color = color,
             avatar = avatar,
             category = category?.name,
-            isArchived = isArchived
+            isArchived = isArchived,
+            aliases = existing?.aliases ?: emptyList(),
+            createdAt = existing?.createdAt ?: LocalDateTime.now()
         )
         repository.updatePerson(entity)
     }

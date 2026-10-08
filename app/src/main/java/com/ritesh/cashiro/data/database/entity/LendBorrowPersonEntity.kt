@@ -35,6 +35,10 @@ data class LendBorrowPersonEntity(
     @ColumnInfo(name = "is_archived", defaultValue = "0")
     val isArchived: Boolean = false,
 
+    /** Other names this person appears under in bank and UPI text, learned when a match is confirmed. */
+    @ColumnInfo(name = "aliases", defaultValue = "'[]'")
+    val aliases: List<String> = emptyList(),
+
     @ColumnInfo(name = "created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
 
